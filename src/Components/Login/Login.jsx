@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Button, Form, Input, Typography, message, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Import Axios
-import { firebaseConfig } from "../../../firebaseConfig"; // Import Firebase configuration
+import axios from "axios"; 
+import { firebaseConfig } from "../../../firebaseConfig"; 
 
 const { Title } = Typography;
 
@@ -24,7 +24,7 @@ const Login = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Make a POST request to the Firebase API for login
+      
       const response = await axios.post(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseConfig.apiKey}`,
         {
@@ -34,10 +34,10 @@ const Login = () => {
         }
       );
 
-      // If login is successful, response will contain user data
+     
       message.success("Login successful!");
       console.log("Logged in user:", response.data);
-      navigate("/LoginManager"); // Redirect to the LoginManager page
+      navigate("/LoginManager"); 
     } catch (error) {
       console.error("Login error:", error);
       message.error("Login failed. Please check your email and password.");

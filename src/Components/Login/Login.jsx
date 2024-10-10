@@ -24,7 +24,7 @@ const Login = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Make a POST request to the Firebase API for login
+      // Đăng nhập vào Firebase
       const response = await axios.post(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseConfig.apiKey}`,
         {
@@ -34,7 +34,7 @@ const Login = () => {
         }
       );
 
-      // Check if the logged-in user exists and get their role
+      // Kiểm tra người dùng tồn tại
       const userRoleResponse = await axios.get(`${firebaseConfig.databaseURL}/account.json`);
       const userRoles = userRoleResponse.data;
 
@@ -42,8 +42,11 @@ const Login = () => {
 
       if (user) {
         message.success("Login successful!");
-        
-        // Navigate based on user role
+
+        // Lưu trữ token vào localStorage (nếu cần)
+        localStorage.setItem('token', response.data.idToken); // Lưu token vào localStorage
+
+        // Điều hướng dựa trên vai trò người dùng
         switch (user.role) {
           case 'admin':
             navigate("/loginmanager"); // Redirect to LoginManager page
@@ -70,7 +73,13 @@ const Login = () => {
       console.log("Logged in user:", response.data);
     } catch (error) {
       console.error("Login error:", error);
-      message.error("Login failed. Please check your email and password.");
+
+      // Kiểm tra thông báo lỗi từ Firebase
+      if (error.response && error.response.data.error) {
+        message.error(error.response.data.error.message); // Hiển thị thông báo lỗi từ Firebase
+      } else {
+        message.error("Login failed. Please check your email and password.");
+      }
     } finally {
       setLoading(false);
     }

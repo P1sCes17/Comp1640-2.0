@@ -1,0 +1,60 @@
+.sidebar {
+  position: fixed;  /* Đảm bảo sidebar cố định */
+  left: 0;          /* Gắn vào bên trái màn hình */
+  top: 0;
+  bottom: 0;
+  width: 250px;     /* Điều chỉnh độ rộng của sidebar */
+  background: linear-gradient(358.3deg, rgb(255, 82, 168) 12.9%, rgb(177, 118, 240) 134.3%);
+  padding: 10px;
+  z-index: 1000;    /* Đảm bảo sidebar luôn trên cùng */
+}
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.logo-sidebar {
+  width: 80px;      /* Điều chỉnh kích thước logo */
+  height: auto;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.sidebar-title {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.ant-menu {
+  background-color: transparent;
+  border-right: none;
+}
+
+.ant-menu-item {
+  color: white !important;
+  font-size: 16px;
+}
+
+.ant-menu-item-selected {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.logout-button {
+  display: block;
+  margin: 20px auto;
+  width: 100%;
+  text-align: center;
+  background-color: #646cff;
+  color: white;
+  border-radius: 5px;
+}
+
+.logout-button.collapsed {
+  display: none; /* Ẩn nút khi sidebar thu gọn */
+}

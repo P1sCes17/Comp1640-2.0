@@ -57,7 +57,7 @@ const LoginManager = () => {
           id: key,
           title: value.title,
           folder_id: value.folder_id, // Ensure this is part of your submission structure
-          submitted_date: value.submitted_date,
+          submitted_date: value.submitted_date, // Đảm bảo lấy dữ liệu submitted_date
           file_word: value.file_word, // Changed from file_url to file_word
         }));
         setSubmissions(submissionList);
@@ -268,27 +268,28 @@ const LoginManager = () => {
             <p><strong>Department ID:</strong> {selectedFolder.department_id}</p>
             <h3>Submissions</h3>
             <Table
-              dataSource={submissions.filter(sub => sub.folder_id === selectedFolder.id)} // Filter submissions by folder ID
-              columns={[
-                {
-                  title: 'Submission Title',
-                  dataIndex: 'title',
-                  key: 'title',
-                },
-                {
-                  title: 'Submitted Date',
-                  dataIndex: 'submitted_date',
-                  key: 'submitted_date',
-                },
-                {
-                  title: 'File Word', // Changed from File URL to File Word
-                  dataIndex: 'file_word',
-                  key: 'file_word',
-                  render: (text) => <a href={text} target="_blank" rel="noopener noreferrer">View File</a>, // Render file link
-                },
-              ]}
-              rowKey="id"
-            />
+  dataSource={submissions.filter(sub => sub.folder_id === selectedFolder.id)} // Lọc submissions theo folder ID
+  columns={[
+    {
+      title: 'Submission Title',
+      dataIndex: 'title',
+      key: 'title',
+    },
+    {
+      title: 'Submitted Date', // Cột cho ngày nộp
+      dataIndex: 'submitted_date',
+      key: 'submitted_date',
+      render: (text) => new Date(text).toLocaleDateString(), // Định dạng ngày
+    },
+    {
+      title: 'File Word', // Changed from File URL to File Word
+      dataIndex: 'file_word',
+      key: 'file_word',
+      render: (text) => <a href={text} target="_blank" rel="noopener noreferrer">View File</a>, // Render file link
+    },
+  ]}
+  rowKey="id"
+/>
           </div>
         )}
       </Modal>

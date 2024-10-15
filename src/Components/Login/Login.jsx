@@ -43,8 +43,9 @@ const Login = () => {
       if (user) {
         message.success("Login successful!");
 
-        // Lưu trữ token vào localStorage (nếu cần)
+        // Lưu trữ token và userID vào localStorage
         localStorage.setItem('token', response.data.idToken); // Lưu token vào localStorage
+        localStorage.setItem('userID', user.user_id); // Lưu userID vào localStorage
 
         // Điều hướng dựa trên vai trò người dùng
         switch (user.role) {
@@ -111,25 +112,14 @@ const Login = () => {
         <Form.Item
           label="Email"
           name="email"
-          rules={[
-            {
-              required: true,
-              type: "email",
-              message: "Please input a valid email!",
-            },
-          ]}
+          rules={[{ required: true, type: "email", message: "Please input a valid email!" }]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           label="Password"
           name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input your password!",
-            },
-          ]}
+          rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password />
         </Form.Item>

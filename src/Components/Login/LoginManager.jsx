@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios"; // Import Axios
-import { firebaseConfig } from "../../../firebaseConfig"; // Import Firebase configuration
+import React, { useEffect, useState } from "react"; 
+import axios from "axios";
+import { firebaseConfig } from "../../../firebaseConfig";
 import { Table, Spin, Button, message } from "antd"; 
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
-import { auth } from "../../../firebaseConfig"; 
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../../firebaseConfig";
+import "../../assets/style/Pages/LoginManager.scss";
+ // Import SCSS
 
 const LoginManager = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Hook to access navigate
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -51,7 +53,7 @@ const LoginManager = () => {
   };
 
   const handleAddAccount = () => {
-    navigate("/loginadd"); // Redirect to the /loginadd page
+    navigate("/loginadd");
   };
 
   const columns = [
@@ -78,21 +80,24 @@ const LoginManager = () => {
   ];
 
   return (
-    <div>
-      <h1>Account List</h1>
-      <Button type="primary" onClick={handleLogout} style={{ marginBottom: '16px', marginRight: '8px' }}>
-        Logout
-      </Button>
-      <Button type="primary" onClick={handleAddAccount} style={{ marginBottom: '16px' }}>
-        Add Account
-      </Button>
+    <div className="login-manager-container">
+      <h1 className="login-manager-header">Account List</h1>
+      <div className="login-manager-buttons">
+        <Button type="primary" onClick={handleLogout}>
+          Logout
+        </Button>
+        <Button type="primary" onClick={handleAddAccount}>
+          Add Account
+        </Button>
+      </div>
       {loading ? (
         <Spin tip="Loading..." />
       ) : (
         <Table 
           dataSource={users} 
           columns={columns} 
-          rowKey="id" 
+          rowKey="id"
+          pagination={false}
         />
       )}
     </div>

@@ -12,6 +12,8 @@ import StudentDashboard from './Components/Student/StudentDashboard';
 import SupervisorDashboard from './Components/Supervisor/SupervisorDashboard';
 import GuestDashboard from './Components/Guest/GuestDashboard';
 import PageNotFound from './Components/PageNotFound/PageNotFound';
+import DepartmentDashboard from './Components/Department/DepartmentDashboard';
+
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           <Route path="student-dashboard" element={<StudentDashboard />} />
           <Route path="supervisor-dashboard" element={<SupervisorDashboard />} />
           <Route path="guest-dashboard" element={<GuestDashboard />} />
+          <Route path="department-dashboard" element={<DepartmentDashboard />} />
+
           {/* Xử lý trang không tìm thấy */}
           <Route path="*" element={<PageNotFound />} />
         </Route>

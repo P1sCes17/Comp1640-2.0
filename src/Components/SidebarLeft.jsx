@@ -34,7 +34,7 @@ const SidebarLeft = ({ role }) => {
     {
       key: "2",
       icon: <TeamOutlined />,
-      label: <NavLink to="/employee-management">Employee Management</NavLink>,
+      label: <NavLink to="/department-dashboard">Department</NavLink>,
     },
     {
       key: "3",

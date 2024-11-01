@@ -1,0 +1,22 @@
+/* Đặt nền màn hình đầy đủ với ảnh nền */
+.login-background {
+    background-image: url('../../images/Bacground-login.jpeg'); /* Thay đổi đường dẫn thành đường dẫn ảnh của bạn */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Định dạng container đăng nhập */
+  .login-container {
+    background: rgba(255, 255, 255, 0.8); /* Nền mờ */
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateX(-55px);
+  }
+  

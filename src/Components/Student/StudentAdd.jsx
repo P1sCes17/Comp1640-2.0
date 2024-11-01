@@ -1,54 +1,55 @@
 import React, { useState } from "react";
 import { storage } from "../../../firebaseConfig"; 
-import { Form, Input, Upload, Button, message, Image, Modal } from "antd";
+import { Form, Input, Upload, Button, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate để chuyển hướng
 import { firebaseConfig } from "../../../firebaseConfig"; 
+import { useLocation } from "react-router-dom";
 
 const StudentAdd = () => {
   const userId = localStorage.getItem('userID');
-  const navigate = useNavigate(); // Khởi tạo navigate
 
   if (!userId) {
     return <div>No user ID available.</div>;
   }
 
   const [form] = Form.useForm();
-  const [previewImages, setPreviewImages] = useState([]);
-  const [previewFiles, setPreviewFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
 
-  const handleFileChange = ({ fileList }) => {
-    const filesPreview = fileList.map(file => ({
-      name: file.name,
-      url: URL.createObjectURL(file.originFileObj || file),
-    }));
-    setPreviewFiles(filesPreview);
-  };
+  // Lấy subject_id từ query params
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const subjectId = queryParams.get("subjectId");
 
-  const handleImageChange = ({ fileList }) => {
-    const imagesPreview = fileList.map(file => ({
-      name: file.name,
-      url: URL.createObjectURL(file.originFileObj || file),
-    }));
-    setPreviewImages(imagesPreview);
+  const handleImageChange = (info) => {
+    // Cập nhật trạng thái với danh sách hình ảnh đã chọn
+    const fileList = info.fileList.map(file => {
+      if (file.response) {
+        // Nếu đã có phản hồi từ server, lấy URL từ phản hồi
+        file.url = file.response.url;
+      }
+      return file;
+    });
+    setImagePreviews(fileList);
   };
 
   const handleSubmit = async (values) => {
     const { files, images } = values;
     if (files && files.length > 0) {
       const submissionData = {
-        user_id: userId, 
+        user_id: userId,
         title: values.title,
-        submission_date: new Date().toISOString(),
+        subject_id: subjectId, // Sử dụng subject_id từ URL
+        submission_date: new Date().toISOString(), // Lưu ngày nộp
         fileUrls: [],
-        fileNames: [], 
-        imageUrls: [], 
-        imageNames: [] 
+        fileNames: [],
+        imageUrls: [],
+        imageNames: []
       };
 
       try {
+        // Upload file và lưu URL cùng tên file vào submissionData
         for (const file of files) {
           const fileObj = file.originFileObj || file;
           const storageRef = ref(storage, `submissions/${fileObj.name}`);
@@ -56,9 +57,10 @@ const StudentAdd = () => {
           const fileUrl = await getDownloadURL(storageRef);
 
           submissionData.fileUrls.push(fileUrl);
-          submissionData.fileNames.push(fileObj.name);
+          submissionData.fileNames.push(fileObj.name); // Lưu tên file gốc
         }
 
+        // Upload hình ảnh và lưu URL cùng tên ảnh vào submissionData
         for (const image of images || []) {
           const imageObj = image.originFileObj || image;
           const imageRef = ref(storage, `submissions/images/${imageObj.name}`);
@@ -66,16 +68,15 @@ const StudentAdd = () => {
           const imageUrl = await getDownloadURL(imageRef);
 
           submissionData.imageUrls.push(imageUrl);
-          submissionData.imageNames.push(imageObj.name);
+          submissionData.imageNames.push(imageObj.name); // Lưu tên ảnh gốc
         }
 
+        // Lưu submission với cả fileNames và imageNames
         const response = await axios.post(`${firebaseConfig.databaseURL}/submissions.json`, submissionData);
         if (response.status === 200) {
           message.success("Submission successful!");
           form.resetFields();
-          setPreviewImages([]);
-          setPreviewFiles([]);
-          navigate('/student-dashboard'); // Chuyển hướng về StudentDashboard sau khi thành công
+          setImagePreviews([]); // Đặt lại trạng thái hình ảnh đã tải lên
         } else {
           throw new Error(`Failed to submit: ${response.statusText}`);
         }
@@ -86,16 +87,6 @@ const StudentAdd = () => {
     } else {
       message.warning("Please upload at least one file.");
     }
-  };
-
-  const showConfirmDialog = () => {
-    Modal.confirm({
-      title: "Confirm Submission",
-      content: "Are you sure you want to submit this assignment?",
-      okText: "Yes",
-      cancelText: "No",
-      onOk: () => form.submit(),
-    });
   };
 
   return (
@@ -116,7 +107,6 @@ const StudentAdd = () => {
         >
           <Input />
         </Form.Item>
-        
         <Form.Item
           name="files"
           label="Upload Files"
@@ -128,48 +118,41 @@ const StudentAdd = () => {
             beforeUpload={() => false} 
             multiple
             accept=".doc,.docx,.png,.jpg,.jpeg"
-            onChange={handleFileChange}
           >
             <Button icon={<UploadOutlined />}>Select Files</Button>
           </Upload>
         </Form.Item>
-        
-        {previewFiles.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <h3>File Previews:</h3>
-            {previewFiles.map((file, index) => (
-              <div key={index}>{file.name}</div>
-            ))}
-          </div>
-        )}
-
         <Form.Item
           name="images"
           label="Upload Images"
           valuePropName="fileList"
           getValueFromEvent={event => Array.isArray(event) ? event : event?.fileList}
+          onChange={handleImageChange} // Thêm hàm xử lý thay đổi hình ảnh
         >
           <Upload 
             beforeUpload={() => false} 
             multiple
             accept=".png,.jpg,.jpeg"
-            onChange={handleImageChange}
           >
             <Button icon={<UploadOutlined />}>Select Images</Button>
           </Upload>
         </Form.Item>
-        
-        {previewImages.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <h3>Image Previews:</h3>
-            {previewImages.map((image, index) => (
-              <Image key={index} src={image.url} width={100} style={{ marginRight: 8 }} />
-            ))}
-          </div>
-        )}
+
+        {/* Hiển thị hình ảnh đã tải lên */}
+        <div>
+          {imagePreviews.map((file) => (
+            <div key={file.uid} style={{ display: 'inline-block', marginRight: 10 }}>
+              <img
+                src={URL.createObjectURL(file.originFileObj)}
+                alt="preview"
+                style={{ width: 100, height: 100, objectFit: 'cover' }}
+              />
+            </div>
+          ))}
+        </div>
 
         <Form.Item>
-          <Button type="primary" onClick={showConfirmDialog}>
+          <Button type="primary" htmlType="submit">
             Submit
           </Button>
         </Form.Item>

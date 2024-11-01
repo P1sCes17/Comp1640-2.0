@@ -37,6 +37,8 @@ function App() {
           <Route path="teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="student-dashboard" element={<StudentDashboard />} />
           <Route path="student-add" element={<StudentAdd />} /> 
+          <Route path="subject" element={<Subject />} />
+          <Route path="new-subject" element={<NewSubject />} />
           <Route path="supervisor-dashboard" element={<SupervisorDashboard />} />
           <Route path="guest-dashboard" element={<GuestDashboard />} />
           {/* Xử lý trang không tìm thấy */}

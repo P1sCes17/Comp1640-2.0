@@ -14,6 +14,7 @@ import PageNotFound from './Components/PageNotFound/PageNotFound';
 import SidebarLeft from './Components/SidebarLeft';
 import Subject from './Components/Teacher/Subject';
 import NewSubject from './Components/Teacher/NewSubject';
+import DepartmentDashboard from './Components/Department/DepartmentDashboard';
 
 
 function App() {
@@ -36,6 +37,8 @@ function App() {
           <Route path="guest-dashboard" element={<GuestDashboard />} />
           <Route path="subject" element={<Subject />} />
           <Route path="new-subject" element={<NewSubject />} />
+          <Route path="department-dashboard" element={<DepartmentDashboard />} />
+
           {/* Xử lý trang không tìm thấy */}
           <Route path="*" element={<PageNotFound />} />
         </Route>

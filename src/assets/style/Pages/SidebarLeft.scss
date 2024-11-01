@@ -1,60 +1,60 @@
-.sidebar {
-  position: fixed;  /* Đảm bảo sidebar cố định */
-  left: 0;          /* Gắn vào bên trái màn hình */
-  top: 0;
-  bottom: 0;
-  width: 250px;     /* Điều chỉnh độ rộng của sidebar */
-  background: linear-gradient(358.3deg, rgb(255, 82, 168) 12.9%, rgb(177, 118, 240) 134.3%);
-  padding: 10px;
-  z-index: 1000;    /* Đảm bảo sidebar luôn trên cùng */
+/* Đảm bảo layout của sidebar và main content */
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #F6EEE0; /* Màu nền cho main content */
 }
 
-.sidebar-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
+/* Sidebar CSS */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  background-color: #F6EEE0;
+  z-index: 1000;
+  transition: width 0.3s ease;
 }
 
 .logo-sidebar {
-  width: 80px;      /* Điều chỉnh kích thước logo */
-  height: auto;
-  border-radius: 50%;
+  width: 50px; /* Điều chỉnh chiều rộng logo */
+  height: 50px; /* Đặt chiều cao logo cho đồng bộ */
+  border-radius: 50%; /* Tùy chọn, nếu muốn logo tròn */
   margin-bottom: 10px;
 }
 
-.sidebar-title {
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
+
+.main-content {
+  margin-left: 10px; /* Đẩy main content sang phải để không nằm dưới sidebar */
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
 }
 
-.ant-menu {
-  background-color: transparent;
-  border-right: none;
+/* Khi sidebar thu gọn */
+.sidebar.collapsed {
+  width: 80px; /* Kích thước sidebar khi thu gọn */
 }
 
-.ant-menu-item {
-  color: white !important;
-  font-size: 16px;
+.main-content.collapsed {
+  margin-left: 80px; /* Điều chỉnh khoảng cách khi sidebar thu gọn */
 }
 
-.ant-menu-item-selected {
-  background-color: rgba(255, 255, 255, 0.2) !important;
-}
+/* Responsive cho thiết bị nhỏ */
+@media (max-width: 768px) {
+  .sidebar {
+    position: absolute; /* Sidebar sẽ hiển thị như một menu kéo ra ở thiết bị nhỏ */
+    width: 200px;
+    transition: transform 0.3s ease; /* Thêm hiệu ứng cho sidebar */
+    transform: translateX(-100%);
+  }
 
-.logout-button {
-  display: block;
-  margin: 20px auto;
-  width: 100%;
-  text-align: center;
-  background-color: #646cff;
-  color: white;
-  border-radius: 5px;
-}
+  .sidebar.show {
+    transform: translateX(0); /* Hiển thị sidebar khi nhấn nút menu */
+  }
 
-.logout-button.collapsed {
-  display: none; /* Ẩn nút khi sidebar thu gọn */
+  .main-content {
+    margin-left: 0; /* Main content chiếm toàn bộ màn hình khi sidebar ẩn */
+  }
 }

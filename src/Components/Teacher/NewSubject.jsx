@@ -1,13 +1,39 @@
-import React from "react";
-import { Button, Form, Input, DatePicker, message } from "antd";
+import React, { useState, useEffect } from "react";
+import { Button, Form, Input, DatePicker, Select, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { createSubject } from "../../service/Subject"; // Import hàm tạo môn học
+import { createSubject } from "../../service/Subject";
+import { database } from "../../../firebaseConfig"; // Import cấu hình Firebase của bạn
+import { ref, get } from "firebase/database"; // Import các hàm từ Firebase
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 const NewSubject = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
+  const [departments, setDepartments] = useState([]); // State để lưu trữ danh sách departments
+
+  // Lấy danh sách departments từ Firebase
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const departmentsRef = ref(database, "departments");
+        const snapshot = await get(departmentsRef);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const departmentList = Object.keys(data).map((key) => ({
+            id: key,
+            name: data[key].name || "Unnamed Department",
+          }));
+          setDepartments(departmentList);
+        }
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+        message.error("Failed to load departments.");
+      }
+    };
+    fetchDepartments();
+  }, []);
 
   // Hàm xử lý khi ấn "Submit"
   const onFinish = async (values) => {
@@ -40,9 +66,15 @@ const NewSubject = () => {
           <Input placeholder="Enter subject name" />
         </Form.Item>
 
-        {/* Trường Department */}
-        <Form.Item label="Department" name="department" rules={[{ required: true, message: "Please input the department!" }]}>
-          <TextArea rows={4} placeholder="Enter department" />
+        {/* Dropdown chọn Department */}
+        <Form.Item label="Department" name="department" rules={[{ required: true, message: "Please select the department!" }]}>
+          <Select placeholder="Select department">
+            {departments.map((dept) => (
+              <Option key={dept.id} value={dept.name}>
+                {dept.name}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
 
         {/* Thêm trường Deadline */}

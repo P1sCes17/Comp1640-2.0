@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Input, message } from "antd";
+import { Button, Form, Input, DatePicker, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { createSubject } from "../../service/Subject"; // Import hàm tạo môn học
 
@@ -14,6 +14,7 @@ const NewSubject = () => {
     try {
       const subjectData = {
         ...values,
+        deadline: values.deadline ? values.deadline.toISOString() : null, // Chuyển đổi deadline thành chuỗi ISO
         createdAt: new Date().toISOString(), // Ngày tạo
       };
 
@@ -39,9 +40,14 @@ const NewSubject = () => {
           <Input placeholder="Enter subject name" />
         </Form.Item>
 
-        {/* Chuyển Description sang Department */}
+        {/* Trường Department */}
         <Form.Item label="Department" name="department" rules={[{ required: true, message: "Please input the department!" }]}>
           <TextArea rows={4} placeholder="Enter department" />
+        </Form.Item>
+
+        {/* Thêm trường Deadline */}
+        <Form.Item label="Deadline" name="deadline" rules={[{ required: true, message: "Please select the deadline!" }]}>
+          <DatePicker showTime placeholder="Select deadline" style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item>

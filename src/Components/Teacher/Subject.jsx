@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { Table, Button, Input, message } from "antd";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
-import { fetchAllSubjects } from "../../service/Subject"; // Import hàm lấy danh sách môn học
+import { useNavigate } from "react-router-dom";
+import { fetchAllSubjects } from "../../service/Subject"; 
 
 const Subject = () => {
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Sử dụng useNavigate để điều hướng
+  const navigate = useNavigate();
 
   // Hàm để lấy danh sách môn học từ Firebase
   useEffect(() => {
@@ -35,8 +35,12 @@ const Subject = () => {
       dataIndex: "name",
       key: "name",
     },
- 
-    
+    {
+      title: "Deadline",
+      dataIndex: "deadline",
+      key: "deadline",
+      render: (deadline) => deadline ? new Date(deadline).toLocaleString() : "No deadline",
+    },
     {
       title: "Actions",
       key: "actions",
@@ -63,7 +67,7 @@ const Subject = () => {
         <Button
           type="primary"
           style={{ backgroundColor: "#1890ff" }}
-          onClick={() => navigate("/new-subject")} // Điều hướng đến trang NewSubject
+          onClick={() => navigate("/new-subject")}
         >
           Add New Subject
         </Button>

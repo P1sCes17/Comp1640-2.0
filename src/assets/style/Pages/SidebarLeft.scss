@@ -4,18 +4,30 @@
   min-height: 100vh;
   background-color: #F6EEE0; /* Màu nền cho main content */
 }
+.sidebar-title {
+  color: #FFFFFF; /* Đổi màu chữ thành trắng */
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
 
 /* Sidebar CSS */
-.sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 250px;
-  background-color: #F6EEE0;
-  z-index: 1000;
-  transition: width 0.3s ease;
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Căn giữa logo theo chiều ngang */
+  justify-content: center; /* Căn giữa logo theo chiều dọc */
+  padding: 20px 0;
 }
+
+.logo-sidebar {
+  width: 50px; /* Kích thước logo */
+  height: 50px; /* Kích thước logo */
+  border-radius: 50%; /* Nếu muốn logo tròn */
+  margin-bottom: 10px;
+}
+
 
 .logo-sidebar {
   width: 50px; /* Điều chỉnh chiều rộng logo */

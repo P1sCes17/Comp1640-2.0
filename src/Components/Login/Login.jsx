@@ -3,19 +3,9 @@ import { Button, Form, Input, Typography, message, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; // Import Axios
 import { firebaseConfig } from "../../../firebaseConfig"; // Import Firebase configuration
+import "../../../src/assets/style/Login/Login.scss"; // Import CSS file
 
 const { Title } = Typography;
-
-const formItemLayout = {
-  labelCol: {
-    xs: { span: 24 },
-    sm: { span: 6 },
-  },
-  wrapperCol: {
-    xs: { span: 24 },
-    sm: { span: 14 },
-  },
-};
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -24,7 +14,6 @@ const Login = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Make a POST request to the Firebase API for login
       const response = await axios.post(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseConfig.apiKey}`,
         {
@@ -34,34 +23,30 @@ const Login = () => {
         }
       );
 
-      // Check if the logged-in user exists and get their role
       const userRoleResponse = await axios.get(`${firebaseConfig.databaseURL}/account.json`);
       const userRoles = userRoleResponse.data;
-
       const user = Object.values(userRoles).find(user => user.email === values.email);
 
       if (user) {
         message.success("Login successful!");
-        
-        // Navigate based on user role
         switch (user.role) {
           case 'admin':
-            navigate("/loginmanager"); // Redirect to LoginManager page
+            navigate("/loginmanager");
             break;
           case 'teacher':
-            navigate("/teacher-dashboard"); // Redirect to Teacher dashboard
+            navigate("/teacher-dashboard");
             break;
           case 'student':
-            navigate("/student-dashboard"); // Redirect to Student dashboard
+            navigate("/student-dashboard");
             break;
           case 'supervisor':
-            navigate("/supervisor-dashboard"); // Redirect to Supervisor dashboard
+            navigate("/supervisor-dashboard");
             break;
           case 'guest':
-            navigate("/guest-dashboard"); // Redirect to Guest dashboard
+            navigate("/guest-dashboard");
             break;
           default:
-            navigate("/user-dashboard"); // Redirect to a default user dashboard
+            navigate("/user-dashboard");
         }
       } else {
         message.error("User not found. Please check your email.");
@@ -81,56 +66,49 @@ const Login = () => {
   };
 
   return (
-    <Spin
-      spinning={loading}
-      tip="Logging in..."
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
-      <Form
-        {...formItemLayout}
-        onFinish={handleSubmit}
-        onFinishFailed={handleFailure}
-      >
-        <Title level={3} style={{ textAlign: "center" }}>
-          Login
-        </Title>
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            {
-              required: true,
-              type: "email",
-              message: "Please input a valid email!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input your password!",
-            },
-          ]}
-        >
-          <Input.Password />
-        </Form.Item>
-        <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Login
-          </Button>
-        </Form.Item>
-      </Form>
-    </Spin>
+    <div className="login-background">
+      <Spin spinning={loading} tip="Logging in...">
+        <div className="login-container">
+          <Form
+            onFinish={handleSubmit}
+            onFinishFailed={handleFailure}
+            style={{ width: "100%" }}
+          >
+            <Title level={3} style={{ textAlign: "center", color: "#003060" }}>
+              Login
+            </Title>
+            <Form.Item
+              name="email"
+              rules={[
+                {
+                  required: true,
+                  type: "email",
+                  message: "Please input a valid email!",
+                },
+              ]}
+            >
+              <Input placeholder="E-mail" />
+            </Form.Item>
+            <Form.Item
+              name="password"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your password!",
+                },
+              ]}
+            >
+              <Input.Password placeholder="Senha" />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" htmlType="submit" block>
+                Sign In 
+              </Button>
+            </Form.Item>
+          </Form>
+        </div>
+      </Spin>
+    </div>
   );
 };
 

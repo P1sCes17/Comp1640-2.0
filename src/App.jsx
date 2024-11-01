@@ -13,7 +13,8 @@ import GuestDashboard from './Components/Guest/GuestDashboard';
 import PageNotFound from './Components/PageNotFound/PageNotFound';
 import SidebarLeft from './Components/SidebarLeft';
 import DepartmentDashboard from './Components/Department/DepartmentDashboard';
-
+import DepartmentAdd from './Components/Department/DepartmentAdd';
+import DepartmentEdit from './Components/Department/DepartmentEdit';
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
           <Route path="supervisor-dashboard" element={<SupervisorDashboard />} />
           <Route path="guest-dashboard" element={<GuestDashboard />} />
           <Route path="department-dashboard" element={<DepartmentDashboard />} />
+          <Route path="department-add" element={<DepartmentAdd />} />
+          <Route path="department-edit/:id" element={<DepartmentEdit />} /> {/* Chỉnh sửa đường dẫn cho DepartmentEdit */}
 
           {/* Xử lý trang không tìm thấy */}
           <Route path="*" element={<PageNotFound />} />

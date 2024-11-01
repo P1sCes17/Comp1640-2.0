@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
-import { Table, Spin, Button, message } from "antd"; 
+import { Table, Spin, Button, message, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../../firebaseConfig";
 import "../../assets/style/Pages/LoginManager.scss";
- // Import SCSS
 
 const LoginManager = () => {
   const [users, setUsers] = useState([]);
@@ -25,7 +24,7 @@ const LoginManager = () => {
           role: value.role,
           department: value.department,
         }));
-        setUsers(userList); 
+        setUsers(userList);
       } else {
         setUsers([]);
       }
@@ -33,12 +32,12 @@ const LoginManager = () => {
       console.error("Error fetching data: ", error);
       message.error("Failed to load users.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(); 
+    fetchData();
   }, []);
 
   const handleLogout = () => {
@@ -54,6 +53,26 @@ const LoginManager = () => {
 
   const handleAddAccount = () => {
     navigate("/loginadd");
+  };
+
+  const handleDelete = (id) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this account?",
+      content: "This action cannot be undone.",
+      okText: "Yes, delete",
+      okType: "danger",
+      cancelText: "No, cancel",
+      onOk: async () => {
+        try {
+          await axios.delete(`${firebaseConfig.databaseURL}/account/${id}.json`);
+          message.success("Account deleted successfully.");
+          setUsers(users.filter((user) => user.id !== id)); // Update the local state
+        } catch (error) {
+          console.error("Error deleting account:", error);
+          message.error("Failed to delete account.");
+        }
+      },
+    });
   };
 
   const columns = [
@@ -76,6 +95,15 @@ const LoginManager = () => {
       title: 'Department',
       dataIndex: 'department',
       key: 'department',
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (text, record) => (
+        <Button type="primary" danger onClick={() => handleDelete(record.id)}>
+          Delete
+        </Button>
+      ),
     },
   ];
 

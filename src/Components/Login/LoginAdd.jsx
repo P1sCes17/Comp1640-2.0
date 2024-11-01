@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Form, Input, Typography, message, Select, Spin } from "antd";
 import axios from "axios";
-import { firebaseConfig } from "../../../firebaseConfig"; 
+import { firebaseConfig } from "../../../firebaseConfig";
 import { useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; 
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
 const { Title } = Typography;
 
@@ -22,25 +22,46 @@ const LoginAdd = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const auth = getAuth(); 
+  const [departments, setDepartments] = useState([]); // State for department options
+  const auth = getAuth();
+
+  useEffect(() => {
+    // Fetch departments from the Realtime Database
+    const fetchDepartments = async () => {
+      try {
+        const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
+        
+        const departmentData = response.data;
+        const departmentList = departmentData
+          ? Object.keys(departmentData).map(key => ({
+              id: key,
+              name: departmentData[key].username, // Use `username` as the department name
+            }))
+          : [];
+
+        setDepartments(departmentList);
+      } catch (error) {
+        console.error("Error fetching departments:", error);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         values.email,
         values.password
       );
 
-      
       const userUID = userCredential.user.uid;
 
-      
       await axios.post(`${firebaseConfig.databaseURL}/account.json`, {
         ...values,
-        userId: userUID 
+        userId: userUID
       });
 
       message.success("User added successfully!");
@@ -127,7 +148,10 @@ const LoginAdd = () => {
         >
           <Select placeholder="Select a Role">
             <Select.Option value="admin">Admin</Select.Option>
-            <Select.Option value="user">User</Select.Option>
+            <Select.Option value="teacher">Teacher</Select.Option>
+            <Select.Option value="student">Student</Select.Option>
+            <Select.Option value="supervisor">Supervisor</Select.Option>
+            <Select.Option value="guest">Guest</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item
@@ -136,11 +160,17 @@ const LoginAdd = () => {
           rules={[
             {
               required: true,
-              message: "Please input the Department!",
+              message: "Please select the Department!",
             },
           ]}
         >
-          <Input />
+          <Select placeholder="Select a Department">
+            {departments.map(dept => (
+              <Select.Option key={dept.id} value={dept.name}>
+                {dept.name}
+              </Select.Option>
+            ))}
+          </Select>
         </Form.Item>
         <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
           <Button type="primary" htmlType="submit">

@@ -1,19 +1,18 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios"; 
-import { firebaseConfig } from "../../../firebaseConfig"; 
-import { Table, Spin, Button, message, Modal, Form, Input, DatePicker } from "antd"; 
-import { useNavigate } from "react-router-dom"; 
-import { auth } from "../../../firebaseConfig"; 
+import React, { useEffect, useState } from "react"; 
+import axios from "axios";
+import { firebaseConfig } from "../../../firebaseConfig";
+import { Table, Spin, Button, message } from "antd"; 
+import { useNavigate } from "react-router-dom";
+import { auth } from "../../../firebaseConfig";
+import "../../assets/style/Pages/LoginManager.scss";
+ // Import SCSS
 
 const LoginManager = () => {
   const [users, setUsers] = useState([]);
   const [folders, setFolders] = useState([]);
   const [submissions, setSubmissions] = useState([]); // State for submissions
   const [loading, setLoading] = useState(true);
-  const [visible, setVisible] = useState(false);
-  const [form] = Form.useForm();
-  const [selectedFolder, setSelectedFolder] = useState(null); 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
@@ -91,42 +90,6 @@ const LoginManager = () => {
     navigate("/loginadd");
   };
 
-  const handleAddFolder = async (values) => {
-    try {
-      const folderData = {
-        folder_name: values.folder_name,
-        created_date: values.created_date.format('YYYY-MM-DD'),
-        deadline: values.deadline.format('YYYY-MM-DD'),
-        department_id: values.department_id,
-      };
-
-      await axios.post(`${firebaseConfig.databaseURL}/folders.json`, folderData);
-      message.success("Folder created successfully!");
-      setVisible(false);
-      form.resetFields();
-      fetchData();
-    } catch (error) {
-      console.error("Error creating folder: ", error);
-      message.error("Failed to create folder.");
-    }
-  };
-
-  const showAddFolderModal = () => {
-    setVisible(true);
-  };
-
-  const handleCancel = () => {
-    setVisible(false);
-  };
-
-  const handleViewFolderDetails = (folder) => {
-    setSelectedFolder(folder); 
-  };
-
-  const handleCloseDetails = () => {
-    setSelectedFolder(null);
-  };
-
   const columns = [
     {
       title: 'Username',
@@ -175,35 +138,25 @@ const LoginManager = () => {
   ];
 
   return (
-    <div>
-      <h1>Account List</h1>
-      <Button type="primary" onClick={handleLogout} style={{ marginBottom: '16px', marginRight: '8px' }}>
-        Logout
-      </Button>
-      <Button type="primary" onClick={handleAddAccount} style={{ marginBottom: '16px', marginRight: '8px' }}>
-        Add Account
-      </Button>
-      <Button type="primary" onClick={showAddFolderModal} style={{ marginBottom: '16px' }}>
-        Add Folder
-      </Button>
-
+    <div className="login-manager-container">
+      <h1 className="login-manager-header">Account List</h1>
+      <div className="login-manager-buttons">
+        <Button type="primary" onClick={handleLogout}>
+          Logout
+        </Button>
+        <Button type="primary" onClick={handleAddAccount}>
+          Add Account
+        </Button>
+      </div>
       {loading ? (
         <Spin tip="Loading..." />
       ) : (
-        <>
-          <Table 
-            dataSource={users} 
-            columns={columns} 
-            rowKey="id" 
-            style={{ marginBottom: '32px' }} 
-          />
-          <h2>Folder List</h2>
-          <Table 
-            dataSource={folders} 
-            columns={folderColumns} 
-            rowKey="id" 
-          />
-        </>
+        <Table 
+          dataSource={users} 
+          columns={columns} 
+          rowKey="id"
+          pagination={false}
+        />
       )}
 
       <Modal

@@ -1,0 +1,27 @@
+/* LoginManager.scss */
+.login-manager-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    width: 100%; /* Đảm bảo phần article chiếm toàn bộ phần còn lại */
+    background-color: #DEF5FD; /* Màu nền cho phần article */
+  }
+  
+  .login-manager-header {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+  
+  .login-manager-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .login-manager-buttons button {
+    margin: 0 8px;
+  }
+  
+  

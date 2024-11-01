@@ -25,7 +25,7 @@ const SidebarLeft = ({ role }) => {
     {
       key: "1",
       icon: <UserOutlined />,
-      label: <NavLink to="/account-management">Manage Accounts</NavLink>,
+      label: <NavLink to="/loginmanager">Manage Accounts</NavLink>,
       children: [
         { key: "1-1", label: <NavLink to="/LoginManager">Account Info</NavLink> },
         { key: "1-2", label: <NavLink to="/change-password">Change Password</NavLink> },

@@ -65,6 +65,17 @@ const SidebarLeft = ({ role }) => {
       key: "5",
       icon: <ToolOutlined />,
       label: <NavLink to="/teacher-dashboard">Teacher</NavLink>, // Cập nhật đường dẫn
+      children: [
+        {
+          key: "5-1",
+          label: <NavLink to="/subject">Subject </NavLink>,
+        },
+        {
+          key: "5-2",
+          label: <NavLink to="/new-subject">New Subject </NavLink>,
+        },
+       
+      ],
     },
     {
       key: "6",

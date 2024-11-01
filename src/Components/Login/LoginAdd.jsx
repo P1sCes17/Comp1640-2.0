@@ -27,14 +27,17 @@ const LoginAdd = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
+      
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         values.email,
         values.password
       );
 
+      
       const userUID = userCredential.user.uid;
 
+      
       await axios.post(`${firebaseConfig.databaseURL}/account.json`, {
         ...values,
         userId: userUID 
@@ -124,10 +127,7 @@ const LoginAdd = () => {
         >
           <Select placeholder="Select a Role">
             <Select.Option value="admin">Admin</Select.Option>
-            <Select.Option value="teacher">Teacher</Select.Option>
-            <Select.Option value="student">Student</Select.Option>
-            <Select.Option value="supervisor">Supervisor</Select.Option>
-            <Select.Option value="guest">Guest</Select.Option>
+            <Select.Option value="user">User</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item

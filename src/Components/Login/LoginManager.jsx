@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Import Axios
-import { firebaseConfig } from "../../../firebaseConfig"; // Import Firebase configuration
+import axios from "axios"; 
+import { firebaseConfig } from "../../../firebaseConfig"; 
 import { Table, Spin, Button, message } from "antd"; 
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate } from "react-router-dom"; 
 import { auth } from "../../../firebaseConfig"; 
 
 const LoginManager = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Hook to access navigate
+  const navigate = useNavigate(); 
 
   const fetchData = async () => {
     try {
@@ -51,7 +51,7 @@ const LoginManager = () => {
   };
 
   const handleAddAccount = () => {
-    navigate("/loginadd"); // Redirect to the /loginadd page
+    navigate("/loginadd"); 
   };
 
   const columns = [

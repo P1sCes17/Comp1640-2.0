@@ -12,6 +12,8 @@ import SupervisorDashboard from './Components/Supervisor/SupervisorDashboard';
 import GuestDashboard from './Components/Guest/GuestDashboard';
 import PageNotFound from './Components/PageNotFound/PageNotFound';
 import SidebarLeft from './Components/SidebarLeft';
+import Subject from './Components/Teacher/Subject';
+import NewSubject from './Components/Teacher/NewSubject';
 import DepartmentDashboard from './Components/Department/DepartmentDashboard';
 import DepartmentAdd from './Components/Department/DepartmentAdd';
 import DepartmentEdit from './Components/Department/DepartmentEdit';
@@ -34,6 +36,8 @@ function App() {
           <Route path="student-dashboard" element={<StudentDashboard />} />
           <Route path="supervisor-dashboard" element={<SupervisorDashboard />} />
           <Route path="guest-dashboard" element={<GuestDashboard />} />
+          <Route path="subject" element={<Subject />} />
+          <Route path="new-subject" element={<NewSubject />} />
           <Route path="department-dashboard" element={<DepartmentDashboard />} />
           <Route path="department-add" element={<DepartmentAdd />} />
           <Route path="department-edit/:id" element={<DepartmentEdit />} /> {/* Chỉnh sửa đường dẫn cho DepartmentEdit */}

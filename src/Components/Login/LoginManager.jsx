@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
-import { Table, Spin, Button, message } from "antd"; 
+import { Table, Spin, Button, message, Modal, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../../firebaseConfig";
 import "../../assets/style/Pages/LoginManager.scss";
- // Import SCSS
 
 const LoginManager = () => {
   const [users, setUsers] = useState([]);
-  const [folders, setFolders] = useState([]);
-  const [submissions, setSubmissions] = useState([]); // State for submissions
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null); // State to hold current user information
   const navigate = useNavigate();
 
   const fetchData = async () => {
@@ -27,52 +25,40 @@ const LoginManager = () => {
           role: value.role,
           department: value.department,
         }));
-        setUsers(userList); 
+        setUsers(userList);
       } else {
         setUsers([]);
-      }
-
-      // Fetch folders
-      const foldersResponse = await axios.get(`${firebaseConfig.databaseURL}/folders.json`);
-      const foldersData = foldersResponse.data;
-      if (foldersData) {
-        const folderList = Object.entries(foldersData).map(([key, value]) => ({
-          id: key,
-          folder_name: value.folder_name,
-          created_date: value.created_date,
-          deadline: value.deadline,
-          department_id: value.department_id,
-        }));
-        setFolders(folderList);
-      } else {
-        setFolders([]);
-      }
-
-      // Fetch submissions
-      const submissionsResponse = await axios.get(`${firebaseConfig.databaseURL}/submissions.json`);
-      const submissionsData = submissionsResponse.data;
-      if (submissionsData) {
-        const submissionList = Object.entries(submissionsData).map(([key, value]) => ({
-          id: key,
-          title: value.title,
-          folder_id: value.folder_id, // Ensure this is part of your submission structure
-          submitted_date: value.submitted_date, // Đảm bảo lấy dữ liệu submitted_date
-          file_word: value.file_word, // Changed from file_url to file_word
-        }));
-        setSubmissions(submissionList);
-      } else {
-        setSubmissions([]);
       }
     } catch (error) {
       console.error("Error fetching data: ", error);
       message.error("Failed to load data.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(); 
+    fetchData();
+    const user = auth.currentUser; // Get the current user from Firebase Auth
+    if (user) {
+      // Fetch user details from the database
+      axios.get(`${firebaseConfig.databaseURL}/account.json`)
+        .then(response => {
+          const usersData = response.data;
+          const currentUserData = Object.entries(usersData).find(([key, value]) => value.email === user.email);
+          if (currentUserData) {
+            const [, value] = currentUserData;
+            setCurrentUser({
+              email: user.email,
+              role: value.role, // Save the role in state
+              department: value.department, // Save the department in state
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching user data: ", error);
+        });
+    }
   }, []);
 
   const handleLogout = () => {
@@ -88,6 +74,26 @@ const LoginManager = () => {
 
   const handleAddAccount = () => {
     navigate("/loginadd");
+  };
+
+  const handleDelete = (id) => {
+    Modal.confirm({
+      title: "Are you sure you want to delete this account?",
+      content: "This action cannot be undone.",
+      okText: "Yes, delete",
+      okType: "danger",
+      cancelText: "No, cancel",
+      onOk: async () => {
+        try {
+          await axios.delete(`${firebaseConfig.databaseURL}/account/${id}.json`);
+          message.success("Account deleted successfully.");
+          setUsers(users.filter((user) => user.id !== id)); // Update the local state
+        } catch (error) {
+          console.error("Error deleting account:", error);
+          message.error("Failed to delete account.");
+        }
+      },
+    });
   };
 
   const columns = [
@@ -111,35 +117,28 @@ const LoginManager = () => {
       dataIndex: 'department',
       key: 'department',
     },
-  ];
-
-  const folderColumns = [
     {
-      title: 'Folder Name',
-      dataIndex: 'folder_name',
-      key: 'folder_name',
-      render: (text, folder) => <a onClick={() => handleViewFolderDetails(folder)}>{text}</a>,
-    },
-    {
-      title: 'Created Date',
-      dataIndex: 'created_date',
-      key: 'created_date',
-    },
-    {
-      title: 'Deadline',
-      dataIndex: 'deadline',
-      key: 'deadline',
-    },
-    {
-      title: 'Department ID',
-      dataIndex: 'department_id',
-      key: 'department_id',
+      title: 'Actions',
+      key: 'actions',
+      render: (text, record) => (
+        <Button type="primary" danger onClick={() => handleDelete(record.id)}>
+          Delete
+        </Button>
+      ),
     },
   ];
 
   return (
     <div className="login-manager-container">
       <h1 className="login-manager-header">Account List</h1>
+      {currentUser && (
+        <div className="current-user-info">
+          <h3>Current User Information</h3>
+          <p><strong>Email:</strong> {currentUser.email}</p>
+          <p><strong>Role:</strong> {currentUser.role}</p>
+          <p><strong>Department:</strong> {currentUser.department}</p> {/* Hiển thị department */}
+        </div>
+      )}
       <div className="login-manager-buttons">
         <Button type="primary" onClick={handleLogout}>
           Logout
@@ -155,97 +154,8 @@ const LoginManager = () => {
           dataSource={users} 
           columns={columns} 
           rowKey="id"
-          pagination={false}
         />
       )}
-
-      <Modal
-        title="Create Folder"
-        visible={visible}
-        onCancel={handleCancel}
-        footer={null}
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleAddFolder}
-        >
-          <Form.Item
-            name="folder_name"
-            label="Folder Name"
-            rules={[{ required: true, message: 'Please input folder name!' }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="created_date"
-            label="Created Date"
-            rules={[{ required: true, message: 'Please select created date!' }]}
-          >
-            <DatePicker />
-          </Form.Item>
-          <Form.Item
-            name="deadline"
-            label="Deadline"
-            rules={[{ required: true, message: 'Please select deadline!' }]}
-          >
-            <DatePicker />
-          </Form.Item>
-          <Form.Item
-            name="department_id"
-            label="Department ID"
-            rules={[{ required: true, message: 'Please input department ID!' }]}
-          >
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Create Folder
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* Modal for folder details */}
-      <Modal
-        title="Folder Details"
-        visible={selectedFolder !== null}
-        onCancel={handleCloseDetails}
-        footer={null}
-      >
-        {selectedFolder && (
-          <div>
-            <p><strong>Folder Name:</strong> {selectedFolder.folder_name}</p>
-            <p><strong>Created Date:</strong> {selectedFolder.created_date}</p>
-            <p><strong>Deadline:</strong> {selectedFolder.deadline}</p>
-            <p><strong>Department ID:</strong> {selectedFolder.department_id}</p>
-            <h3>Submissions</h3>
-            <Table
-  dataSource={submissions.filter(sub => sub.folder_id === selectedFolder.id)} // Lọc submissions theo folder ID
-  columns={[
-    {
-      title: 'Submission Title',
-      dataIndex: 'title',
-      key: 'title',
-    },
-    {
-      title: 'Submitted Date', // Cột cho ngày nộp
-      dataIndex: 'submitted_date',
-      key: 'submitted_date',
-      render: (text) => new Date(text).toLocaleDateString(), // Định dạng ngày
-    },
-    {
-      title: 'File Word', // Changed from File URL to File Word
-      dataIndex: 'file_word',
-      key: 'file_word',
-      render: (text) => <a href={text} target="_blank" rel="noopener noreferrer">View File</a>, // Render file link
-    },
-  ]}
-  rowKey="id"
-/>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

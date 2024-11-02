@@ -1,12 +1,14 @@
 /* Đặt nền màn hình đầy đủ với ảnh nền */
 .login-background {
-    background-image: url('../../images/Bacground-login.jpeg'); /* Thay đổi đường dẫn thành đường dẫn ảnh của bạn */
-    background-size: cover;
-    background-position: center;
+    background-image: url('../../images/Bacground-login.jpeg'); /* Đảm bảo đường dẫn đúng */
+    background-size: cover; /* Đảm bảo ảnh bao phủ toàn bộ */
+    background-position: center; /* Căn giữa ảnh nền */
+    background-repeat: no-repeat; /* Không lặp lại ảnh nền */
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    
   }
   
   /* Định dạng container đăng nhập */
@@ -14,9 +16,24 @@
     background: rgba(255, 255, 255, 0.8); /* Nền mờ */
     padding: 40px;
     width: 100%;
-    max-width: 400px;
+    max-width: 100px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: translateX(-55px);
+    margin-left: -10px; /* Không cần dùng translate và margin nếu bạn muốn căn giữa */
+  }
+  
+  /* Responsive cho màn hình lớn hơn */
+  @media (min-width: 768px) {
+    .login-container {
+      max-width: 400px; /* Tăng kích thước cho màn hình lớn hơn */
+    }
+  }
+  
+  /* Responsive cho màn hình rất nhỏ (như điện thoại) */
+  @media (max-width: 480px) {
+    .login-container {
+      max-width: 90%; /* Đảm bảo form không bị nhỏ quá trên thiết bị di động */
+      padding: 20px;
+    }
   }
   

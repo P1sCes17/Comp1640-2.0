@@ -52,10 +52,8 @@ const DepartmentDashboard = () => {
   };
 
   const columns = [
-    { title: 'Department ID', dataIndex: 'id', key: 'id' },
+    // { title: 'Department ID', dataIndex: 'id', key: 'id' },
     { title: 'Department Name', dataIndex: 'username', key: 'username' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Role', dataIndex: 'role', key: 'role' },
     {
       title: 'Action',
       key: 'action',

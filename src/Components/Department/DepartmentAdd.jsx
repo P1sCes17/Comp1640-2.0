@@ -36,16 +36,6 @@ const DepartmentAdd = () => {
         >
           <Input />
         </Form.Item>
-        <Form.Item
-          name="email"
-          label="Email"
-          rules={[{ type: "email", required: true, message: 'Please input a valid email!' }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item name="role" label="Role">
-          <Input />
-        </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading}>
             Add Department

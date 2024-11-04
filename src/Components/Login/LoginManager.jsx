@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
-import { Table, Spin, Button, message, Modal } from "antd";
+import { Table, Spin, Button, message, Modal, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../../firebaseConfig";
 import "../../assets/style/Pages/LoginManager.scss";
@@ -9,15 +9,16 @@ import "../../assets/style/Pages/LoginManager.scss";
 const LoginManager = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null); // State to hold current user information
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${firebaseConfig.databaseURL}/account.json`);
-      const data = response.data;
-
-      if (data) {
-        const userList = Object.entries(data).map(([key, value]) => ({
+      // Fetch users
+      const usersResponse = await axios.get(`${firebaseConfig.databaseURL}/account.json`);
+      const usersData = usersResponse.data;
+      if (usersData) {
+        const userList = Object.entries(usersData).map(([key, value]) => ({
           id: key,
           username: value.username,
           email: value.email,
@@ -30,7 +31,7 @@ const LoginManager = () => {
       }
     } catch (error) {
       console.error("Error fetching data: ", error);
-      message.error("Failed to load users.");
+      message.error("Failed to load data.");
     } finally {
       setLoading(false);
     }
@@ -38,6 +39,26 @@ const LoginManager = () => {
 
   useEffect(() => {
     fetchData();
+    const user = auth.currentUser; // Get the current user from Firebase Auth
+    if (user) {
+      // Fetch user details from the database
+      axios.get(`${firebaseConfig.databaseURL}/account.json`)
+        .then(response => {
+          const usersData = response.data;
+          const currentUserData = Object.entries(usersData).find(([key, value]) => value.email === user.email);
+          if (currentUserData) {
+            const [, value] = currentUserData;
+            setCurrentUser({
+              email: user.email,
+              role: value.role, // Save the role in state
+              department: value.department, // Save the department in state
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching user data: ", error);
+        });
+    }
   }, []);
 
   const handleLogout = () => {
@@ -110,6 +131,14 @@ const LoginManager = () => {
   return (
     <div className="login-manager-container">
       <h1 className="login-manager-header">Account List</h1>
+      {currentUser && (
+        <div className="current-user-info">
+          <h3>Current User Information</h3>
+          <p><strong>Email:</strong> {currentUser.email}</p>
+          <p><strong>Role:</strong> {currentUser.role}</p>
+          <p><strong>Department:</strong> {currentUser.department}</p> {/* Hiển thị department */}
+        </div>
+      )}
       <div className="login-manager-buttons">
         <Button type="primary" onClick={handleLogout}>
           Logout
@@ -125,7 +154,6 @@ const LoginManager = () => {
           dataSource={users} 
           columns={columns} 
           rowKey="id"
-          pagination={false}
         />
       )}
     </div>

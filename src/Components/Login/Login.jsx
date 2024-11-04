@@ -55,7 +55,13 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      message.error("Login failed. Please check your email and password.");
+
+      // Kiểm tra thông báo lỗi từ Firebase
+      if (error.response && error.response.data.error) {
+        message.error(error.response.data.error.message); // Hiển thị thông báo lỗi từ Firebase
+      } else {
+        message.error("Login failed. Please check your email and password.");
+      }
     } finally {
       setLoading(false); // Tắt trạng thái loading nếu có lỗi xảy ra
     }
@@ -67,7 +73,6 @@ const Login = () => {
 
   return (
     <Spin spinning={loading} tip="Logging in..." size="large">
-      {/* Loading toàn trang */}
       <div className="login-background">
         <div className="login-container">
           <Form onFinish={handleSubmit} onFinishFailed={handleFailure} style={{ width: "100%" }}>

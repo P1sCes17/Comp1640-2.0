@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Button, DatePicker, Select, message } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { database } from "../../../firebaseConfig"; // Import cấu hình Firebase
+import { ref, push, set } from "firebase/database"; // Import các hàm từ Firebase
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -12,7 +14,7 @@ const NewSubject = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Lấy danh sách departments từ Firebase và chỉ lấy phần `username`
+  // Lấy danh sách departments từ Firebase
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
@@ -22,7 +24,7 @@ const NewSubject = () => {
         const departmentsData = response.data
           ? Object.keys(response.data).map((key) => ({
               id: key,
-              name: response.data[key].username, // Lấy giá trị `username`
+              name: response.data[key].username, // Lấy `username` làm tên department
             }))
           : [];
         setDepartments(departmentsData);
@@ -36,15 +38,35 @@ const NewSubject = () => {
     fetchDepartments();
   }, []);
 
+  // Hàm tạo subject trong Firebase
+  const createSubject = async (subjectData) => {
+    try {
+      const newSubjectRef = push(ref(database, "subjects")); // Tạo mục mới trong nhánh "subjects"
+      await set(newSubjectRef, subjectData);
+      return { success: true };
+    } catch (error) {
+      console.error("Error creating subject:", error);
+      return { success: false };
+    }
+  };
+
   // Xử lý khi gửi form
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const subjectData = {
       ...values,
+      department: values.department, // Lưu ID của department
       deadline: values.deadline ? values.deadline.toISOString() : null,
       createdAt: new Date().toISOString(),
     };
-    message.success("Subject added successfully!");
-    navigate("/subject"); // Điều hướng về trang danh sách môn học
+
+    const result = await createSubject(subjectData);
+
+    if (result.success) {
+      message.success("Subject added successfully!");
+      navigate("/subject"); // Điều hướng đến trang danh sách môn học
+    } else {
+      message.error("Failed to add subject to Firebase.");
+    }
   };
 
   return (
@@ -67,8 +89,8 @@ const NewSubject = () => {
         >
           <Select placeholder="Select a department" loading={loading}>
             {departments.map((department) => (
-              <Option key={department.id} value={department.name}>
-                {department.name} {/* Hiển thị `username` */}
+              <Option key={department.id} value={department.id}> {/* Sử dụng ID */}
+                {department.name}
               </Option>
             ))}
           </Select>

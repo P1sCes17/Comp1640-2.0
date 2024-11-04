@@ -12,7 +12,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (values) => {
-    setLoading(true); // Bật trạng thái loading khi bắt đầu quá trình đăng nhập
+    setLoading(true);
     try {
       const response = await axios.post(
         `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${firebaseConfig.apiKey}`,
@@ -28,7 +28,25 @@ const Login = () => {
       const user = Object.values(userRoles).find((user) => user.email === values.email);
 
       if (user) {
-        message.success("Login successful!");
+        const username = user.username;
+
+        // Lưu thông tin người dùng vào localStorage
+        localStorage.setItem("user", JSON.stringify({
+          email: values.email,
+          role: user.role,
+          department: user.department,
+          userId: user.userId // Lưu userId vào đây
+        }));
+
+        console.log("User data saved:", {
+          email: values.email,
+          role: user.role,
+          department: user.department,
+          userId: user.userId // Log thông tin người dùng
+        });
+
+        message.success(`Đăng nhập thành công với tài khoản: ${username}!`);
+
         setTimeout(() => {
           switch (user.role) {
             case "admin":
@@ -49,21 +67,19 @@ const Login = () => {
             default:
               navigate("/user-dashboard");
           }
-        }, 500); // Chờ một chút trước khi chuyển hướng để duy trì trạng thái loading
+        }, 500);
       } else {
         message.error("User not found. Please check your email.");
       }
     } catch (error) {
       console.error("Login error:", error);
-
-      // Kiểm tra thông báo lỗi từ Firebase
       if (error.response && error.response.data.error) {
-        message.error(error.response.data.error.message); // Hiển thị thông báo lỗi từ Firebase
+        message.error(error.response.data.error.message);
       } else {
         message.error("Login failed. Please check your email and password.");
       }
     } finally {
-      setLoading(false); // Tắt trạng thái loading nếu có lỗi xảy ra
+      setLoading(false);
     }
   };
 
@@ -72,8 +88,8 @@ const Login = () => {
   };
 
   return (
-    <Spin spinning={loading} tip="Logging in..." size="large">
-      <div className="login-background">
+    <div className="login-background">
+      <Spin spinning={loading} size="large">
         <div className="login-container">
           <Form onFinish={handleSubmit} onFinishFailed={handleFailure} style={{ width: "100%" }}>
             <Title level={3} style={{ textAlign: "center", color: "#003060" }}>
@@ -81,24 +97,13 @@ const Login = () => {
             </Title>
             <Form.Item
               name="email"
-              rules={[
-                {
-                  required: true,
-                  type: "email",
-                  message: "Please input a valid email!",
-                },
-              ]}
+              rules={[{ required: true, type: "email", message: "Please input a valid email!" }]}
             >
               <Input placeholder="E-mail" />
             </Form.Item>
             <Form.Item
               name="password"
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your password!",
-                },
-              ]}
+              rules={[{ required: true, message: "Please input your password!" }]}
             >
               <Input.Password placeholder="Password" />
             </Form.Item>
@@ -109,8 +114,8 @@ const Login = () => {
             </Form.Item>
           </Form>
         </div>
-      </div>
-    </Spin>
+      </Spin>
+    </div>
   );
 };
 

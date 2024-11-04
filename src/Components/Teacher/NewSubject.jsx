@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { database } from "../../../firebaseConfig"; // Import cấu hình Firebase
 import { ref, push, set } from "firebase/database"; // Import các hàm từ Firebase
 
-const { TextArea } = Input;
 const { Option } = Select;
 
 const NewSubject = () => {
@@ -24,7 +23,7 @@ const NewSubject = () => {
         const departmentsData = response.data
           ? Object.keys(response.data).map((key) => ({
               id: key,
-              name: response.data[key].username, // Lấy `username` làm tên department
+              name: response.data[key].departmentName, // Lấy `departmentName` làm tên department
             }))
           : [];
         setDepartments(departmentsData);
@@ -52,9 +51,11 @@ const NewSubject = () => {
 
   // Xử lý khi gửi form
   const onFinish = async (values) => {
+    const selectedDepartment = departments.find(department => department.id === values.department);
+    
     const subjectData = {
       ...values,
-      department: values.department, // Lưu ID của department
+      departmentName: selectedDepartment ? selectedDepartment.name : "Unknown Department", // Gán tên khoa thay vì ID
       deadline: values.deadline ? values.deadline.toISOString() : null,
       createdAt: new Date().toISOString(),
     };
@@ -89,7 +90,7 @@ const NewSubject = () => {
         >
           <Select placeholder="Select a department" loading={loading}>
             {departments.map((department) => (
-              <Option key={department.id} value={department.id}> {/* Sử dụng ID */}
+              <Option key={department.id} value={department.id}>
                 {department.name}
               </Option>
             ))}

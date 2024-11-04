@@ -5,43 +5,44 @@ import { UploadOutlined } from "@ant-design/icons";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig"; 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // Thêm useNavigate
 
 const StudentAdd = () => {
-  const userId = localStorage.getItem('userID');
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user ? user.userId : null;
 
   if (!userId) {
+    console.log("No user ID available. User data:", user);
     return <div>No user ID available.</div>;
   }
 
   const [form] = Form.useForm();
   const [imagePreviews, setImagePreviews] = useState([]);
-
-  // Lấy subject_id từ query params
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const subjectId = queryParams.get("subjectId");
+  const navigate = useNavigate(); // Khởi tạo navigate
 
   const handleImageChange = (info) => {
-    // Cập nhật trạng thái với danh sách hình ảnh đã chọn
-    const fileList = info.fileList.map(file => {
-      if (file.response) {
-        // Nếu đã có phản hồi từ server, lấy URL từ phản hồi
-        file.url = file.response.url;
-      }
-      return file;
+    const fileList = info.fileList || [];
+    const previews = fileList.map(file => {
+      if (!file.originFileObj) return file;
+      return Object.assign(file, {
+        preview: URL.createObjectURL(file.originFileObj),
+      });
     });
-    setImagePreviews(fileList);
+    setImagePreviews(previews);
   };
 
   const handleSubmit = async (values) => {
     const { files, images } = values;
+
     if (files && files.length > 0) {
       const submissionData = {
         user_id: userId,
         title: values.title,
-        subject_id: subjectId, // Sử dụng subject_id từ URL
-        submission_date: new Date().toISOString(), // Lưu ngày nộp
+        subject_id: subjectId,
+        submission_date: new Date().toISOString(),
         fileUrls: [],
         fileNames: [],
         imageUrls: [],
@@ -49,7 +50,6 @@ const StudentAdd = () => {
       };
 
       try {
-        // Upload file và lưu URL cùng tên file vào submissionData
         for (const file of files) {
           const fileObj = file.originFileObj || file;
           const storageRef = ref(storage, `submissions/${fileObj.name}`);
@@ -57,10 +57,9 @@ const StudentAdd = () => {
           const fileUrl = await getDownloadURL(storageRef);
 
           submissionData.fileUrls.push(fileUrl);
-          submissionData.fileNames.push(fileObj.name); // Lưu tên file gốc
+          submissionData.fileNames.push(fileObj.name);
         }
 
-        // Upload hình ảnh và lưu URL cùng tên ảnh vào submissionData
         for (const image of images || []) {
           const imageObj = image.originFileObj || image;
           const imageRef = ref(storage, `submissions/images/${imageObj.name}`);
@@ -68,15 +67,15 @@ const StudentAdd = () => {
           const imageUrl = await getDownloadURL(imageRef);
 
           submissionData.imageUrls.push(imageUrl);
-          submissionData.imageNames.push(imageObj.name); // Lưu tên ảnh gốc
+          submissionData.imageNames.push(imageObj.name);
         }
 
-        // Lưu submission với cả fileNames và imageNames
         const response = await axios.post(`${firebaseConfig.databaseURL}/submissions.json`, submissionData);
         if (response.status === 200) {
           message.success("Submission successful!");
           form.resetFields();
-          setImagePreviews([]); // Đặt lại trạng thái hình ảnh đã tải lên
+          setImagePreviews([]);
+          navigate("/student-dashboard"); // Sử dụng navigate để chuyển hướng
         } else {
           throw new Error(`Failed to submit: ${response.statusText}`);
         }
@@ -127,7 +126,7 @@ const StudentAdd = () => {
           label="Upload Images"
           valuePropName="fileList"
           getValueFromEvent={event => Array.isArray(event) ? event : event?.fileList}
-          onChange={handleImageChange} // Thêm hàm xử lý thay đổi hình ảnh
+          onChange={handleImageChange}
         >
           <Upload 
             beforeUpload={() => false} 
@@ -137,26 +136,23 @@ const StudentAdd = () => {
             <Button icon={<UploadOutlined />}>Select Images</Button>
           </Upload>
         </Form.Item>
-
-        {/* Hiển thị hình ảnh đã tải lên */}
-        <div>
-          {imagePreviews.map((file) => (
-            <div key={file.uid} style={{ display: 'inline-block', marginRight: 10 }}>
-              <img
-                src={URL.createObjectURL(file.originFileObj)}
-                alt="preview"
-                style={{ width: 100, height: 100, objectFit: 'cover' }}
-              />
-            </div>
-          ))}
-        </div>
-
         <Form.Item>
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
         </Form.Item>
       </Form>
+
+      {imagePreviews.length > 0 && (
+        <div>
+          <h2>Image Previews:</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            {imagePreviews.map((file, index) => (
+              <img key={index} src={file.preview} alt="Preview" style={{ width: '100px', height: '100px', margin: '5px' }} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

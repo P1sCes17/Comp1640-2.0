@@ -19,7 +19,7 @@ const DepartmentAdd = () => {
     } finally {
       setLoading(false);
     }
-  }; 
+  };
 
   return (
     <div>
@@ -30,9 +30,9 @@ const DepartmentAdd = () => {
         style={{ maxWidth: 600, marginTop: '16px' }}
       >
         <Form.Item
-          name="username"
-          label="Department Name"
-          rules={[{ required: true, message: 'Please input the department name!' }]}
+          name="departmentName" // Thay đổi tên trường thành departmentName
+          label="Department Name" // Tiêu đề trường
+          rules={[{ required: true, message: 'Please input the department name!' }]} // Quy tắc yêu cầu
         >
           <Input />
         </Form.Item>

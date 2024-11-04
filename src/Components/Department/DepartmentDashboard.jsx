@@ -52,10 +52,7 @@ const DepartmentDashboard = () => {
   };
 
   const columns = [
-    { title: 'Department ID', dataIndex: 'id', key: 'id' },
-    { title: 'Department Name', dataIndex: 'username', key: 'username' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Role', dataIndex: 'role', key: 'role' },
+    { title: 'Department Name', dataIndex: 'departmentName', key: 'departmentName' }, // Cập nhật tên trường
     {
       title: 'Action',
       key: 'action',

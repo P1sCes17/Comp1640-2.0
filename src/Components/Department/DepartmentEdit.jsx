@@ -13,7 +13,7 @@ const DepartmentEdit = () => {
     const fetchDepartment = async () => {
       try {
         const response = await axios.get(`https://comp1640-448f0-default-rtdb.asia-southeast1.firebasedatabase.app/departments/${id}.json`);
-        form.setFieldsValue(response.data);
+        form.setFieldsValue(response.data); // Thiết lập giá trị cho form
       } catch (error) {
         message.error("Failed to load department data.");
       }
@@ -44,22 +44,9 @@ const DepartmentEdit = () => {
         style={{ maxWidth: 600, marginTop: '16px' }}
       >
         <Form.Item
-          name="username"
+          name="departmentName" // Chỉ giữ lại trường tên phòng ban
           label="Department Name"
-          rules={[{ required: true, message: 'Please enter the department name.' }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="email"
-          label="Email"
-          rules={[{ type: "email", required: true, message: 'Please enter a valid email.' }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          name="role"
-          label="Role"
+          rules={[{ required: true, message: 'Please enter the department name.' }]} // Quy tắc yêu cầu
         >
           <Input />
         </Form.Item>

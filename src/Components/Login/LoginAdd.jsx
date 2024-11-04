@@ -32,13 +32,16 @@ const LoginAdd = () => {
         const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
         
         const departmentData = response.data;
+        console.log("Fetched department data:", departmentData); // Kiểm tra dữ liệu
+
         const departmentList = departmentData
           ? Object.keys(departmentData).map(key => ({
               id: key,
-              name: departmentData[key].username, // Use `username` as the department name
+              name: departmentData[key].departmentName, // Sử dụng `departmentName` làm tên phòng ban
             }))
           : [];
 
+        console.log("Department list:", departmentList); // Kiểm tra danh sách phòng ban
         setDepartments(departmentList);
       } catch (error) {
         console.error("Error fetching departments:", error);
@@ -102,49 +105,41 @@ const LoginAdd = () => {
         <Form.Item
           label="Username"
           name="username"
-          rules={[
-            {
-              required: true,
-              message: "Please input the Username!",
-            },
-          ]}
+          rules={[{
+            required: true,
+            message: "Please input the Username!",
+          }]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           label="Email"
           name="email"
-          rules={[
-            {
-              required: true,
-              type: "email",
-              message: "Please input a valid email!",
-            },
-          ]}
+          rules={[{
+            required: true,
+            type: "email",
+            message: "Please input a valid email!",
+          }]}
         >
           <Input />
         </Form.Item>
         <Form.Item
           label="Password"
           name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input the Password!",
-            },
-          ]}
+          rules={[{
+            required: true,
+            message: "Please input the Password!",
+          }]}
         >
           <Input.Password />
         </Form.Item>
         <Form.Item
           label="Role"
           name="role"
-          rules={[
-            {
-              required: true,
-              message: "Please select the Role!",
-            },
-          ]}
+          rules={[{
+            required: true,
+            message: "Please select the Role!",
+          }]}
         >
           <Select placeholder="Select a Role">
             <Select.Option value="admin">Admin</Select.Option>
@@ -157,17 +152,15 @@ const LoginAdd = () => {
         <Form.Item
           label="Department"
           name="department"
-          rules={[
-            {
-              required: true,
-              message: "Please select the Department!",
-            },
-          ]}
+          rules={[{
+            required: true,
+            message: "Please select the Department!",
+          }]}
         >
           <Select placeholder="Select a Department">
             {departments.map(dept => (
-              <Select.Option key={dept.id} value={dept.name}>
-                {dept.name}
+              <Select.Option key={dept.id} value={dept.id}> {/* Sử dụng dept.id làm giá trị */}
+                {dept.name} {/* Hiển thị dept.name */}
               </Select.Option>
             ))}
           </Select>

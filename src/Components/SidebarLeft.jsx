@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Layout, Menu, Button } from "antd";
 import {
   UserOutlined,
@@ -9,7 +9,7 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
 } from "@ant-design/icons";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import "../assets/style/Pages/SidebarLeft.scss";
 import LogoutButton from "./LogoutButton";
 
@@ -20,6 +20,8 @@ const { Sider } = Layout;
 
 const SidebarLeft = ({ role }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [username, setUsername] = useState(""); // State để lưu tên tài khoản
+  const location = useLocation(); // Hook để lấy thông tin vị trí hiện tại
 
   const adminMenuItems = [
     {
@@ -63,6 +65,19 @@ const SidebarLeft = ({ role }) => {
     { key: "8", label: <LogoutButton collapsed={collapsed} /> },
   ];
 
+  // Lấy tên tài khoản từ localStorage khi component mount
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
+
+  // Lắng nghe thay đổi vị trí và làm mới
+  useEffect(() => {
+    // Có thể thêm logic ở đây nếu bạn muốn thực hiện điều gì đó khi vị trí thay đổi
+  }, [location]);
+
   return (
     <Sider
       className="Sidebar"
@@ -73,9 +88,21 @@ const SidebarLeft = ({ role }) => {
     >
       <div className="sidebar-header">
         <img src={logoSidebar} alt="Get IT" className="logo-sidebar" />
-        {!collapsed && <h2 className="sidebar-title">GETIT COMPANY</h2>}
+        {!collapsed && (
+          <>
+            <h2 className="sidebar-title">GETIT COMPANY</h2>
+            <div className="account-info">
+              <span>Welcome, {username}</span>
+            </div>
+          </>
+        )}
       </div>
-      <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]} items={role === "admin" ? adminMenuItems : employeeMenuItems} />
+      <Menu
+        theme="dark"
+        mode="inline"
+        defaultSelectedKeys={["1"]}
+        items={role === "admin" ? adminMenuItems : employeeMenuItems}
+      />
     </Sider>
   );
 };

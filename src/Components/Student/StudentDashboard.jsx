@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSubjects } from "../../service/Subject";
+import { fetchAllSubjects } from "../../service/Subject"; // Import service để lấy danh sách môn học
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
 
@@ -12,15 +12,33 @@ const StudentDashboard = () => {
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userID");
+  
+  // Lấy userId từ localStorage
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userId = userData ? userData.userId : null;
+
+  // In ra userId để kiểm tra
+  console.log("Current User ID:", userId);
+
+  // Lấy danh sách khoa từ Firebase
+  const fetchAllDepartments = async () => {
+    const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
+    return response.data;
+  };
 
   // Lấy danh sách môn học từ Firebase
   useEffect(() => {
     const loadSubjects = async () => {
       try {
-        const data = await fetchAllSubjects();
+        const [data, departments] = await Promise.all([fetchAllSubjects(), fetchAllDepartments()]);
+
         if (data) {
-          const subjectList = Object.keys(data).map((key) => ({ id: key, ...data[key] }));
+          const subjectList = Object.keys(data).map((key) => {
+            const subject = { id: key, ...data[key] };
+            // Ánh xạ tên khoa từ department ID
+            subject.departmentName = departments[subject.department]?.departmentName || "No Department";
+            return subject;
+          });
           setSubjects(subjectList);
         } else {
           setSubjects([]);
@@ -40,16 +58,26 @@ const StudentDashboard = () => {
     try {
       const response = await axios.get(`${firebaseConfig.databaseURL}/submissions.json`);
       const data = response.data;
+
+      console.log("Fetched Submissions Data:", data); // In ra toàn bộ dữ liệu bài nộp
+
       if (data) {
         const filteredSubmissions = Object.entries(data)
-          .map(([key, value]) => ({
-            submission_id: key,
-            ...value,
-          }))
-          .filter((submission) => submission.user_id === userId && submission.subject_id === subjectId);
+          .map(([key, value]) => {
+            console.log("Submission Entry:", key, value); // In ra từng bài nộp
+            return {
+              submission_id: key,
+              ...value,
+            };
+          })
+          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId); // Lọc theo subjectId và userId
+
+        console.log("Filtered Submissions:", filteredSubmissions); // In ra các bài nộp đã lọc
+
         setSubmissions(filteredSubmissions);
       } else {
         setSubmissions([]);
+        console.log("No submissions data found."); // Thông báo nếu không có dữ liệu bài nộp
       }
     } catch (error) {
       console.error("Error fetching submissions: ", error);
@@ -83,10 +111,16 @@ const StudentDashboard = () => {
       ),
     },
     {
+      title: "Department",
+      dataIndex: "departmentName",
+      key: "departmentName",
+      render: (departmentName) => departmentName || "No Department",
+    },
+    {
       title: "Deadline",
       dataIndex: "deadline",
       key: "deadline",
-      render: (deadline) => deadline ? new Date(deadline).toLocaleString() : "No deadline",
+      render: (deadline) => (deadline ? new Date(deadline).toLocaleString() : "No deadline"),
     },
   ];
 
@@ -101,7 +135,7 @@ const StudentDashboard = () => {
       title: "Submission Date",
       dataIndex: "submission_date",
       key: "submission_date",
-      render: (date) => date ? new Date(date).toLocaleString() : "No Date",
+      render: (date) => (date ? new Date(date).toLocaleString() : "No Date"),
     },
     {
       title: "Files",
@@ -163,7 +197,7 @@ const StudentDashboard = () => {
             type="primary"
             style={{ marginTop: 16 }}
             onClick={() => handleAddSubmission(selectedSubject.id)}
-            disabled={new Date(selectedSubject.deadline) < new Date()} // Không cho phép nộp nếu quá hạn
+            disabled={new Date(selectedSubject.deadline) < new Date()} // Không cho phép nộp bài sau thời hạn
           >
             Add New Submission
           </Button>

@@ -1,9 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Spin, message } from "antd";
+import { Avatar, Form, List, Input, Table, Button, Spin, message, Modal } from "antd"; // Import Comment here
 import { useNavigate } from "react-router-dom";
-import { fetchAllSubjects } from "../../service/Subject"; // Import service để lấy danh sách môn học
+import { fetchAllSubjects } from "../../service/Subject";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
+import moment from "moment";
+
+const { TextArea } = Input;
+
+const CommentList = ({ comments }) => (
+  <List
+    dataSource={comments}
+    header={`${comments.length} ${comments.length > 1 ? 'replies' : 'reply'}`}
+    itemLayout="horizontal"
+    renderItem={props => <Comment {...props} />}
+  />
+);
+
+const Editor = ({ onChange, onSubmit, submitting, value }) => (
+  <div>
+    <Form.Item>
+      <TextArea rows={4} onChange={onChange} value={value} />
+    </Form.Item>
+    <Form.Item>
+      <Button htmlType="submit" loading={submitting} onClick={onSubmit} type="primary">
+        Add Comment
+      </Button>
+    </Form.Item>
+  </div>
+);  
+
 
 const StudentDashboard = () => {
   const [subjects, setSubjects] = useState([]);
@@ -11,7 +37,63 @@ const StudentDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [modalText, setModalText] = useState('Content of the modal');
+  const [visible, setVisible] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [value, setValue] = useState('');
   const navigate = useNavigate();
+
+
+  
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [clickedRow, setClickedRow] = useState(null);
+
+
+  const handleSubmit = () => {
+    if (!value) {
+      return;
+    }
+
+    setSubmitting(true);
+
+    setTimeout(() => {
+      setComments([
+        {
+          author: 'Han Solo',
+          avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
+          content: <p>{value}</p>,
+          datetime: moment().fromNow(),
+        },
+        ...comments,
+      ]);
+      setSubmitting(false);
+      setValue('');
+    }, 1000);
+  };
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  };
+
+
+  const showModal = (rowIndex) => {
+    setClickedRow("LSKdjflaksdjflkasjdflkajskdlf"); 
+    console.log(submissions[rowIndex]);
+    // Store the clicked row index
+    setIsModalVisible(true); // Open the modal
+  };
+
+  const handleOk = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+
   
   // Lấy userId từ localStorage
   const userData = JSON.parse(localStorage.getItem("user"));
@@ -162,9 +244,72 @@ const StudentDashboard = () => {
         ),
     },
   ];
+  
 
   return (
     <div>
+       
+       <Modal
+        title={`Row ${clickedRow + 1} Details`}
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <div>
+      {comments.length > 0 && <CommentList comments={comments} />}
+      <Comment
+        avatar={
+          <Avatar
+            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+            alt="Han Solo"
+          />
+        }
+        content={
+          <Editor
+            onChange={handleChange}
+            onSubmit={handleSubmit}
+            submitting={submitting}
+            value={value}
+          />
+        }
+      />
+    </div>
+      </Modal>
+
+
+      <div>
+      <Modal
+        title={`Row ${clickedRow + 1} Details`}
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <div>
+          {comments.length > 0 && <CommentList comments={comments} />}
+          <Comment
+            avatar={
+              <Avatar
+                src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+                alt="Han Solo"
+              />
+            }
+            content={
+              <Editor
+                onChange={handleChange}
+                onSubmit={handleSubmit}
+                submitting={submitting}
+                value={value}
+              />
+            }
+          />
+        </div>
+      </Modal>
+
+      {/* Existing content for Student Dashboard... */}
+    </div>
+
+
+
       <h1>Student Dashboard</h1>
 
       {loadingSubjects ? (
@@ -186,6 +331,11 @@ const StudentDashboard = () => {
             <Spin tip="Loading Submissions..." />
           ) : (
             <Table
+              onRow={(record, rowIndex) => {
+                return {
+                  onClick: () => showModal(rowIndex),
+                };
+              }}
               dataSource={submissions}
               columns={submissionColumns}
               rowKey="submission_id"

@@ -44,7 +44,8 @@ const Login = () => {
           department: user.department,
           userId: user.userId // Log thông tin người dùng
         });
-
+        console.log("- Role User: "+user.role);
+        
         message.success(`Đăng nhập thành công với tài khoản: ${username}!`);
 
         setTimeout(() => {

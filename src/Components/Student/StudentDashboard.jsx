@@ -1,35 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Avatar, Form, List, Input, Table, Button, Spin, message, Modal } from "antd"; // Import Comment here
+import React, { useState, useEffect } from "react";
+import { Table, Button, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { fetchAllSubjects } from "../../service/Subject";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
-import moment from "moment";
-
-const { TextArea } = Input;
-
-const CommentList = ({ comments }) => (
-  <List
-    dataSource={comments}
-    header={`${comments.length} ${comments.length > 1 ? 'replies' : 'reply'}`}
-    itemLayout="horizontal"
-    renderItem={props => <Comment {...props} />}
-  />
-);
-
-const Editor = ({ onChange, onSubmit, submitting, value }) => (
-  <div>
-    <Form.Item>
-      <TextArea rows={4} onChange={onChange} value={value} />
-    </Form.Item>
-    <Form.Item>
-      <Button htmlType="submit" loading={submitting} onClick={onSubmit} type="primary">
-        Add Comment
-      </Button>
-    </Form.Item>
-  </div>
-);  
-
+import CommentSection from "./CommentSection";  // Correct default import
 
 const StudentDashboard = () => {
   const [subjects, setSubjects] = useState([]);
@@ -37,87 +12,23 @@ const StudentDashboard = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
-  const [modalText, setModalText] = useState('Content of the modal');
-  const [visible, setVisible] = useState(false);
-  const [confirmLoading, setConfirmLoading] = useState(false);
-  const [comments, setComments] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [value, setValue] = useState('');
   const navigate = useNavigate();
 
-
-  
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [clickedRow, setClickedRow] = useState(null);
-
-
-  const handleSubmit = () => {
-    if (!value) {
-      return;
-    }
-
-    setSubmitting(true);
-
-    setTimeout(() => {
-      setComments([
-        {
-          author: 'Han Solo',
-          avatar: 'https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png',
-          content: <p>{value}</p>,
-          datetime: moment().fromNow(),
-        },
-        ...comments,
-      ]);
-      setSubmitting(false);
-      setValue('');
-    }, 1000);
-  };
-  const handleChange = (e) => {
-    setValue(e.target.value);
-  };
-
-
-  const showModal = (rowIndex) => {
-    setClickedRow("LSKdjflaksdjflkasjdflkajskdlf"); 
-    console.log(submissions[rowIndex]);
-    // Store the clicked row index
-    setIsModalVisible(true); // Open the modal
-  };
-
-  const handleOk = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-
-  
-  // Lấy userId từ localStorage
   const userData = JSON.parse(localStorage.getItem("user"));
   const userId = userData ? userData.userId : null;
 
-  // In ra userId để kiểm tra
-  console.log("Current User ID:", userId);
-
-  // Lấy danh sách khoa từ Firebase
   const fetchAllDepartments = async () => {
     const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
     return response.data;
   };
 
-  // Lấy danh sách môn học từ Firebase
   useEffect(() => {
     const loadSubjects = async () => {
       try {
         const [data, departments] = await Promise.all([fetchAllSubjects(), fetchAllDepartments()]);
-
         if (data) {
           const subjectList = Object.keys(data).map((key) => {
             const subject = { id: key, ...data[key] };
-            // Ánh xạ tên khoa từ department ID
             subject.departmentName = departments[subject.department]?.departmentName || "No Department";
             return subject;
           });
@@ -134,53 +45,40 @@ const StudentDashboard = () => {
     loadSubjects();
   }, []);
 
-  // Lấy danh sách bài nộp cho môn học đã chọn
   const fetchSubmissions = async (subjectId) => {
     setLoadingSubmissions(true);
     try {
       const response = await axios.get(`${firebaseConfig.databaseURL}/submissions.json`);
       const data = response.data;
 
-      console.log("Fetched Submissions Data:", data); // In ra toàn bộ dữ liệu bài nộp
-
       if (data) {
         const filteredSubmissions = Object.entries(data)
-          .map(([key, value]) => {
-            console.log("Submission Entry:", key, value); // In ra từng bài nộp
-            return {
-              submission_id: key,
-              ...value,
-            };
-          })
-          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId); // Lọc theo subjectId và userId
-
-        console.log("Filtered Submissions:", filteredSubmissions); // In ra các bài nộp đã lọc
+          .map(([key, value]) => ({
+            submission_id: key,
+            ...value,
+          }))
+          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId);
 
         setSubmissions(filteredSubmissions);
       } else {
         setSubmissions([]);
-        console.log("No submissions data found."); // Thông báo nếu không có dữ liệu bài nộp
       }
     } catch (error) {
-      console.error("Error fetching submissions: ", error);
       message.error("Failed to load submissions.");
     } finally {
       setLoadingSubmissions(false);
     }
   };
 
-  // Khi chọn một môn học
   const handleSubjectClick = (subject) => {
     setSelectedSubject(subject);
-    fetchSubmissions(subject.id); // Lấy bài nộp cho môn học này
+    fetchSubmissions(subject.id);
   };
 
-  // Điều hướng đến trang thêm bài nộp mới
   const handleAddSubmission = (subjectId) => {
     navigate(`/student-add?subjectId=${subjectId}`);
   };
 
-  // Định nghĩa cấu trúc bảng cho môn học
   const subjectColumns = [
     {
       title: "Name Subject",
@@ -206,7 +104,6 @@ const StudentDashboard = () => {
     },
   ];
 
-  // Định nghĩa cấu trúc bảng cho bài nộp
   const submissionColumns = [
     {
       title: "Title",
@@ -231,85 +128,21 @@ const StudentDashboard = () => {
         ),
     },
     {
-      title: "Images",
-      dataIndex: "imageUrls",
-      key: "imageUrls",
-      render: (imageUrls) =>
-        Array.isArray(imageUrls) && imageUrls.length > 0 ? (
-          imageUrls.map((url, index) => (
-            <img key={index} src={url} alt={`submission-image-${index}`} style={{ width: 50, height: 50, marginRight: 5 }} />
-          ))
-        ) : (
-          "No Images"
-        ),
+      title: "Comments",
+      key: "comments",
+      render: (_, record) => (
+        // In StudentDashboard.jsx
+        <CommentSection 
+          submissionId={record.submission_id}
+          userId={userId} 
+          role={userData.role}  // Pass the role here
+        />
+      ),
     },
   ];
-  
 
   return (
     <div>
-       
-       <Modal
-        title={`Row ${clickedRow + 1} Details`}
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <div>
-      {comments.length > 0 && <CommentList comments={comments} />}
-      <Comment
-        avatar={
-          <Avatar
-            src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-            alt="Han Solo"
-          />
-        }
-        content={
-          <Editor
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-            value={value}
-          />
-        }
-      />
-    </div>
-      </Modal>
-
-
-      <div>
-      <Modal
-        title={`Row ${clickedRow + 1} Details`}
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <div>
-          {comments.length > 0 && <CommentList comments={comments} />}
-          <Comment
-            avatar={
-              <Avatar
-                src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
-                alt="Han Solo"
-              />
-            }
-            content={
-              <Editor
-                onChange={handleChange}
-                onSubmit={handleSubmit}
-                submitting={submitting}
-                value={value}
-              />
-            }
-          />
-        </div>
-      </Modal>
-
-      {/* Existing content for Student Dashboard... */}
-    </div>
-
-
-
       <h1>Student Dashboard</h1>
 
       {loadingSubjects ? (
@@ -331,11 +164,6 @@ const StudentDashboard = () => {
             <Spin tip="Loading Submissions..." />
           ) : (
             <Table
-              onRow={(record, rowIndex) => {
-                return {
-                  onClick: () => showModal(rowIndex),
-                };
-              }}
               dataSource={submissions}
               columns={submissionColumns}
               rowKey="submission_id"
@@ -347,7 +175,7 @@ const StudentDashboard = () => {
             type="primary"
             style={{ marginTop: 16 }}
             onClick={() => handleAddSubmission(selectedSubject.id)}
-            disabled={new Date(selectedSubject.deadline) < new Date()} // Không cho phép nộp bài sau thời hạn
+            disabled={new Date(selectedSubject.deadline) < new Date()}
           >
             Add New Submission
           </Button>

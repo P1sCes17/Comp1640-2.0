@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSubjects } from "../../service/Subject";
+import { firebaseConfig } from "../../../firebaseConfig"; // Đảm bảo đúng đường dẫn
+import { getDatabase, ref, get } from "firebase/database"; // Thêm import từ Firebase
 import axios from "axios";
-import { firebaseConfig } from "../../../firebaseConfig";
-import CommentSection from "./CommentSection";  // Correct default import
+import CommentSection from "./CommentSection";  // Import component comment
 
 const StudentDashboard = () => {
   const [subjects, setSubjects] = useState([]);
@@ -17,39 +17,42 @@ const StudentDashboard = () => {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userId = userData ? userData.userId : null;
 
-  const fetchAllDepartments = async () => {
-    const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
-    return response.data;
+  // Hàm lấy tất cả các môn học từ Firebase
+  const fetchAllSubjects = async () => {
+    const db = getDatabase();
+    const subjectsRef = ref(db, 'subjects'); // Đảm bảo đúng đường dẫn đến 'subjects'
+    try {
+      const snapshot = await get(subjectsRef);
+      const data = snapshot.val();
+      
+      if (data) {
+        const subjectList = Object.keys(data).map((key) => {
+          return { id: key, ...data[key] };
+        });
+        setSubjects(subjectList); // Lưu vào state
+      } else {
+        setSubjects([]); // Nếu không có dữ liệu, trả về mảng rỗng
+      }
+    } catch (error) {
+      message.error("Failed to load subjects.");
+    } finally {
+      setLoadingSubjects(false);
+    }
   };
 
+  // useEffect để tải môn học khi component load
   useEffect(() => {
-    const loadSubjects = async () => {
-      try {
-        const [data, departments] = await Promise.all([fetchAllSubjects(), fetchAllDepartments()]);
-        if (data) {
-          const subjectList = Object.keys(data).map((key) => {
-            const subject = { id: key, ...data[key] };
-            subject.departmentName = departments[subject.department]?.departmentName || "No Department";
-            return subject;
-          });
-          setSubjects(subjectList);
-        } else {
-          setSubjects([]);
-        }
-      } catch (error) {
-        message.error("Failed to load subjects.");
-      } finally {
-        setLoadingSubjects(false);
-      }
-    };
-    loadSubjects();
+    fetchAllSubjects();
   }, []);
 
+  // Hàm lấy submissions của môn học
   const fetchSubmissions = async (subjectId) => {
     setLoadingSubmissions(true);
     try {
-      const response = await axios.get(`${firebaseConfig.databaseURL}/submissions.json`);
-      const data = response.data;
+      const db = getDatabase();
+      const submissionsRef = ref(db, 'submissions'); // Đảm bảo đúng đường dẫn
+      const snapshot = await get(submissionsRef);
+      const data = snapshot.val();
 
       if (data) {
         const filteredSubmissions = Object.entries(data)
@@ -61,7 +64,7 @@ const StudentDashboard = () => {
 
         setSubmissions(filteredSubmissions);
       } else {
-        setSubmissions([]);
+        setSubmissions([]); // Nếu không có dữ liệu, trả về mảng rỗng
       }
     } catch (error) {
       message.error("Failed to load submissions.");
@@ -92,9 +95,9 @@ const StudentDashboard = () => {
     },
     {
       title: "Department",
-      dataIndex: "departmentName",
-      key: "departmentName",
-      render: (departmentName) => departmentName || "No Department",
+      dataIndex: "department",
+      key: "department",
+      render: (department) => department || "No Department",
     },
     {
       title: "Deadline",
@@ -131,7 +134,6 @@ const StudentDashboard = () => {
       title: "Comments",
       key: "comments",
       render: (_, record) => (
-        // In StudentDashboard.jsx
         <CommentSection 
           submissionId={record.submission_id}
           userId={userId} 

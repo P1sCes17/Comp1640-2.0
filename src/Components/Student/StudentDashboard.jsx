@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { firebaseConfig } from "../../../firebaseConfig"; // Đảm bảo đúng đường dẫn
-import { getDatabase, ref, get } from "firebase/database"; // Thêm import từ Firebase
+import { fetchAllSubjects } from "../../service/Subject";
 import axios from "axios";
-import CommentSection from "./CommentSection";  // Import component comment
+import { firebaseConfig } from "../../../firebaseConfig";
+import CommentSection from "./CommentSection";
 
 const StudentDashboard = () => {
   const [subjects, setSubjects] = useState([]);
@@ -15,57 +15,60 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
 
   const userData = JSON.parse(localStorage.getItem("user"));
-  const userId = userData ? userData.userId : null;
   const userDepartment = userData ? userData.department : null;
 
-  // Hàm lấy tất cả các môn học từ Firebase
-  const fetchAllSubjects = async () => {
-    const db = getDatabase();
-    const subjectsRef = ref(db, 'subjects'); // Đảm bảo đúng đường dẫn đến 'subjects'
-    try {
-      const snapshot = await get(subjectsRef);
-      const data = snapshot.val();
-      
-      if (data) {
-        const subjectList = Object.keys(data).map((key) => {
-          return { id: key, ...data[key] };
-        });
-        setSubjects(subjectList); // Lưu vào state
-      } else {
-        setSubjects([]); // Nếu không có dữ liệu, trả về mảng rỗng
-      }
-    } catch (error) {
-      message.error("Failed to load subjects.");
-    } finally {
-      setLoadingSubjects(false);
-    }
+  const fetchAllDepartments = async () => {
+    const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
+    return response.data;
   };
 
-  // useEffect để tải môn học khi component load
   useEffect(() => {
-    fetchAllSubjects();
-  }, []);
+    const loadSubjects = async () => {
+      try {
+        const [data, departments] = await Promise.all([fetchAllSubjects(), fetchAllDepartments()]);
+        if (data) {
+          const subjectList = Object.keys(data).map((key) => {
+            const subject = { id: key, ...data[key] };
+            subject.departmentName = departments[subject.department]?.departmentName || "No Department";
+            return subject;
+          });
 
-  // Hàm lấy submissions của môn học
+          // Lọc các môn học có department trùng với department của người dùng
+          const filteredSubjects = subjectList.filter(
+            (subject) => subject.department === userDepartment
+          );
+
+          setSubjects(filteredSubjects);
+        } else {
+          setSubjects([]);
+        }
+      } catch (error) {
+        message.error("Failed to load subjects.");
+      } finally {
+        setLoadingSubjects(false);
+      }
+    };
+    loadSubjects();
+  }, [userDepartment]);
+
   const fetchSubmissions = async (subjectId) => {
     setLoadingSubmissions(true);
     try {
-      const db = getDatabase();
-      const submissionsRef = ref(db, 'submissions'); // Đảm bảo đúng đường dẫn
-      const snapshot = await get(submissionsRef);
-      const data = snapshot.val();
+      const response = await axios.get(`${firebaseConfig.databaseURL}/submissions.json`);
+      const data = response.data;
 
       if (data) {
+        // Hiển thị tất cả submissions liên quan đến subject mà không lọc theo user ID
         const filteredSubmissions = Object.entries(data)
           .map(([key, value]) => ({
             submission_id: key,
             ...value,
           }))
-          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId);
+          .filter((submission) => submission.subject_id === subjectId);
 
         setSubmissions(filteredSubmissions);
       } else {
-        setSubmissions([]); // Nếu không có dữ liệu, trả về mảng rỗng
+        setSubmissions([]);
       }
     } catch (error) {
       message.error("Failed to load submissions.");
@@ -96,9 +99,9 @@ const StudentDashboard = () => {
     },
     {
       title: "Department",
-      dataIndex: "department",
-      key: "department",
-      render: (department) => department || "No Department",
+      dataIndex: "departmentName",
+      key: "departmentName",
+      render: (departmentName) => departmentName || "No Department",
     },
     {
       title: "Deadline",
@@ -137,8 +140,8 @@ const StudentDashboard = () => {
       render: (_, record) => (
         <CommentSection 
           submissionId={record.submission_id}
-          userId={userId} 
-          role={userData.role}  // Pass the role here
+          userId={userData.userId} 
+          role={userData.role}
         />
       ),
     },
@@ -178,7 +181,7 @@ const StudentDashboard = () => {
             type="primary"
             style={{ marginTop: 16 }}
             onClick={() => handleAddSubmission(selectedSubject.id)}
-            disabled={new Date(selectedSubject.deadline) < new Date()}
+            disabled={selectedSubject.submissionsDisabled || new Date(selectedSubject.deadline) < new Date()}
           >
             Add New Submission
           </Button>

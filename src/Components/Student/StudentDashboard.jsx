@@ -200,14 +200,15 @@ const StudentDashboard = () => {
             />
           )}
 
-          <Button
-            type="primary"
-            style={{ marginTop: 16 }}
-            onClick={() => handleAddSubmission(selectedSubject.id)}
-            disabled={new Date(selectedSubject.deadline) < new Date()} // Không cho phép nộp bài sau thời hạn
-          >
-            Add New Submission
-          </Button>
+<Button
+  type="primary"
+  style={{ marginTop: 16 }}
+  onClick={() => handleAddSubmission(selectedSubject.id)}
+  disabled={selectedSubject.submissionsDisabled || new Date(selectedSubject.deadline) < new Date()}
+>
+  Add New Submission
+</Button>
+
         </div>
       )}
     </div>

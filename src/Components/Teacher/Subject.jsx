@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, Input, message, Popconfirm } from "antd";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSubjects } from "../../service/Subject"; 
+import { fetchAllSubjects } from "../../service/Subject";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
 
@@ -13,6 +13,11 @@ const Subject = () => {
   const navigate = useNavigate();
   const auth = getAuth();
   const currentUser = auth.currentUser;
+
+  // Lấy thông tin user và department từ localStorage
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userDepartment = userData ? userData.department : null;
+  const userRole = userData ? userData.role : null;
 
   // Hàm để lấy danh sách departments từ Firebase
   useEffect(() => {
@@ -40,14 +45,23 @@ const Subject = () => {
             const subject = data[key];
             return {
               id: key,
-              name: subject.name || "Unknown", 
-              departmentId: subject.department || "Unknown", 
-              deadline: subject.deadline || null, 
+              name: subject.name || "Unknown",
+              departmentId: subject.department || "Unknown",
+              deadline: subject.deadline || null,
             };
           });
 
+          let filteredSubjects = subjectList;
+
+          // Nếu tài khoản là ADMIN, không lọc theo department mà hiển thị tất cả các môn học
+          if (userRole !== "admin") {
+            filteredSubjects = subjectList.filter(
+              (subject) => subject.departmentId === userDepartment
+            );
+          }
+
           // Sắp xếp danh sách môn học theo tên phòng ban
-          const sortedSubjects = subjectList.sort((a, b) => {
+          const sortedSubjects = filteredSubjects.sort((a, b) => {
             const departmentA = departments[a.departmentId]?.departmentName || "";
             const departmentB = departments[b.departmentId]?.departmentName || "";
             return departmentA.localeCompare(departmentB);
@@ -64,7 +78,7 @@ const Subject = () => {
       }
     };
     loadSubjects();
-  }, [currentUser, departments]); // Giữ currentUser và departments trong mảng phụ thuộc
+  }, [currentUser, departments, userDepartment, userRole]);
 
   // Hàm để xóa một môn học
   const handleDelete = async (id) => {
@@ -93,7 +107,7 @@ const Subject = () => {
     },
     {
       title: "Department",
-      dataIndex: "departmentId", // Sử dụng departmentId ở đây
+      dataIndex: "departmentId",
       key: "departmentId",
       render: (departmentId) =>
         departments[departmentId]?.departmentName || "Unknown",

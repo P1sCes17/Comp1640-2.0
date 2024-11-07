@@ -16,6 +16,7 @@ const StudentDashboard = () => {
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userId = userData ? userData.userId : null;
+  const userDepartment = userData ? userData.department : null;
 
   // Hàm lấy tất cả các môn học từ Firebase
   const fetchAllSubjects = async () => {

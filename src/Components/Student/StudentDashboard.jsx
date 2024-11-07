@@ -13,9 +13,10 @@ const StudentDashboard = () => {
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const navigate = useNavigate();
   
-  // Lấy userId từ localStorage
+  // Lấy userId và department từ localStorage
   const userData = JSON.parse(localStorage.getItem("user"));
   const userId = userData ? userData.userId : null;
+  const userDepartment = userData ? userData.department : null;
 
   // In ra userId để kiểm tra
   console.log("Current User ID:", userId);
@@ -26,7 +27,7 @@ const StudentDashboard = () => {
     return response.data;
   };
 
-  // Lấy danh sách môn học từ Firebase
+  // Lấy danh sách môn học từ Firebase và lọc theo khoa của người dùng
   useEffect(() => {
     const loadSubjects = async () => {
       try {
@@ -39,7 +40,13 @@ const StudentDashboard = () => {
             subject.departmentName = departments[subject.department]?.departmentName || "No Department";
             return subject;
           });
-          setSubjects(subjectList);
+
+          // Lọc các môn học có department trùng với department của người dùng
+          const filteredSubjects = subjectList.filter(
+            (subject) => subject.department === userDepartment
+          );
+
+          setSubjects(filteredSubjects);
         } else {
           setSubjects([]);
         }
@@ -50,7 +57,7 @@ const StudentDashboard = () => {
       }
     };
     loadSubjects();
-  }, []);
+  }, [userDepartment]);
 
   // Lấy danh sách bài nộp cho môn học đã chọn
   const fetchSubmissions = async (subjectId) => {

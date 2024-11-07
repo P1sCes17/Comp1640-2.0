@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Button, Spin, message } from "antd";
 import { useNavigate } from "react-router-dom";
-import { fetchAllSubjects } from "../../service/Subject"; // Import service để lấy danh sách môn học
+import { fetchAllSubjects } from "../../service/Subject";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
+import CommentSection from "./CommentSection";  // Correct default import
 
 const StudentDashboard = () => {
   const [subjects, setSubjects] = useState([]);
@@ -12,31 +13,23 @@ const StudentDashboard = () => {
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const navigate = useNavigate();
-  
-  // Lấy userId và department từ localStorage
+
   const userData = JSON.parse(localStorage.getItem("user"));
   const userId = userData ? userData.userId : null;
   const userDepartment = userData ? userData.department : null;
 
-  // In ra userId để kiểm tra
-  console.log("Current User ID:", userId);
-
-  // Lấy danh sách khoa từ Firebase
   const fetchAllDepartments = async () => {
     const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
     return response.data;
   };
 
-  // Lấy danh sách môn học từ Firebase và lọc theo khoa của người dùng
   useEffect(() => {
     const loadSubjects = async () => {
       try {
         const [data, departments] = await Promise.all([fetchAllSubjects(), fetchAllDepartments()]);
-
         if (data) {
           const subjectList = Object.keys(data).map((key) => {
             const subject = { id: key, ...data[key] };
-            // Ánh xạ tên khoa từ department ID
             subject.departmentName = departments[subject.department]?.departmentName || "No Department";
             return subject;
           });
@@ -59,53 +52,40 @@ const StudentDashboard = () => {
     loadSubjects();
   }, [userDepartment]);
 
-  // Lấy danh sách bài nộp cho môn học đã chọn
   const fetchSubmissions = async (subjectId) => {
     setLoadingSubmissions(true);
     try {
       const response = await axios.get(`${firebaseConfig.databaseURL}/submissions.json`);
       const data = response.data;
 
-      console.log("Fetched Submissions Data:", data); // In ra toàn bộ dữ liệu bài nộp
-
       if (data) {
         const filteredSubmissions = Object.entries(data)
-          .map(([key, value]) => {
-            console.log("Submission Entry:", key, value); // In ra từng bài nộp
-            return {
-              submission_id: key,
-              ...value,
-            };
-          })
-          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId); // Lọc theo subjectId và userId
-
-        console.log("Filtered Submissions:", filteredSubmissions); // In ra các bài nộp đã lọc
+          .map(([key, value]) => ({
+            submission_id: key,
+            ...value,
+          }))
+          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId);
 
         setSubmissions(filteredSubmissions);
       } else {
         setSubmissions([]);
-        console.log("No submissions data found."); // Thông báo nếu không có dữ liệu bài nộp
       }
     } catch (error) {
-      console.error("Error fetching submissions: ", error);
       message.error("Failed to load submissions.");
     } finally {
       setLoadingSubmissions(false);
     }
   };
 
-  // Khi chọn một môn học
   const handleSubjectClick = (subject) => {
     setSelectedSubject(subject);
-    fetchSubmissions(subject.id); // Lấy bài nộp cho môn học này
+    fetchSubmissions(subject.id);
   };
 
-  // Điều hướng đến trang thêm bài nộp mới
   const handleAddSubmission = (subjectId) => {
     navigate(`/student-add?subjectId=${subjectId}`);
   };
 
-  // Định nghĩa cấu trúc bảng cho môn học
   const subjectColumns = [
     {
       title: "Name Subject",
@@ -131,7 +111,6 @@ const StudentDashboard = () => {
     },
   ];
 
-  // Định nghĩa cấu trúc bảng cho bài nộp
   const submissionColumns = [
     {
       title: "Title",
@@ -156,17 +135,16 @@ const StudentDashboard = () => {
         ),
     },
     {
-      title: "Images",
-      dataIndex: "imageUrls",
-      key: "imageUrls",
-      render: (imageUrls) =>
-        Array.isArray(imageUrls) && imageUrls.length > 0 ? (
-          imageUrls.map((url, index) => (
-            <img key={index} src={url} alt={`submission-image-${index}`} style={{ width: 50, height: 50, marginRight: 5 }} />
-          ))
-        ) : (
-          "No Images"
-        ),
+      title: "Comments",
+      key: "comments",
+      render: (_, record) => (
+        // In StudentDashboard.jsx
+        <CommentSection 
+          submissionId={record.submission_id}
+          userId={userId} 
+          role={userData.role}  // Pass the role here
+        />
+      ),
     },
   ];
 
@@ -204,7 +182,7 @@ const StudentDashboard = () => {
             type="primary"
             style={{ marginTop: 16 }}
             onClick={() => handleAddSubmission(selectedSubject.id)}
-            disabled={new Date(selectedSubject.deadline) < new Date()} // Không cho phép nộp bài sau thời hạn
+            disabled={new Date(selectedSubject.deadline) < new Date()}
           >
             Add New Submission
           </Button>

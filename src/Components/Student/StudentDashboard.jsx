@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllSubjects } from "../../service/Subject";
 import axios from "axios";
 import { firebaseConfig } from "../../../firebaseConfig";
-import CommentSection from "./CommentSection";  // Correct default import
+import CommentSection from "./CommentSection";
 
 const StudentDashboard = () => {
   const [subjects, setSubjects] = useState([]);
@@ -15,7 +15,6 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
 
   const userData = JSON.parse(localStorage.getItem("user"));
-  const userId = userData ? userData.userId : null;
   const userDepartment = userData ? userData.department : null;
 
   const fetchAllDepartments = async () => {
@@ -59,12 +58,13 @@ const StudentDashboard = () => {
       const data = response.data;
 
       if (data) {
+        // Hiển thị tất cả submissions liên quan đến subject mà không lọc theo user ID
         const filteredSubmissions = Object.entries(data)
           .map(([key, value]) => ({
             submission_id: key,
             ...value,
           }))
-          .filter((submission) => submission.subject_id === subjectId && submission.user_id === userId);
+          .filter((submission) => submission.subject_id === subjectId);
 
         setSubmissions(filteredSubmissions);
       } else {
@@ -138,11 +138,10 @@ const StudentDashboard = () => {
       title: "Comments",
       key: "comments",
       render: (_, record) => (
-        // In StudentDashboard.jsx
         <CommentSection 
           submissionId={record.submission_id}
-          userId={userId} 
-          role={userData.role}  // Pass the role here
+          userId={userData.userId} 
+          role={userData.role}
         />
       ),
     },
@@ -182,7 +181,7 @@ const StudentDashboard = () => {
             type="primary"
             style={{ marginTop: 16 }}
             onClick={() => handleAddSubmission(selectedSubject.id)}
-            disabled={new Date(selectedSubject.deadline) < new Date()}
+            disabled={selectedSubject.submissionsDisabled || new Date(selectedSubject.deadline) < new Date()}
           >
             Add New Submission
           </Button>

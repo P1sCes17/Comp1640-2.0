@@ -46,7 +46,7 @@ const Login = () => {
         });
         console.log("- Role User: "+user.role);
         
-        message.success(`Đăng nhập thành công với tài khoản: ${username}!`);
+        message.success(`Successfully logged in to your account: ${username}!`);
 
         setTimeout(() => {
           switch (user.role) {

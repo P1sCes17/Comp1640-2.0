@@ -19,6 +19,7 @@ import NewSubject from './Components/Teacher/NewSubject';
 import DepartmentDashboard from './Components/Department/DepartmentDashboard';
 import DepartmentAdd from './Components/Department/DepartmentAdd';
 import DepartmentEdit from './Components/Department/DepartmentEdit';
+import GuestAdd from './Components/Guest/GuestAdd';
 
 function App() {
   return (
@@ -47,7 +48,7 @@ function App() {
           <Route path="department-dashboard" element={<DepartmentDashboard />} />
           <Route path="department-add" element={<DepartmentAdd />} />
           <Route path="department-edit/:id" element={<DepartmentEdit />} /> {/* Chỉnh sửa đường dẫn cho DepartmentEdit */}
-
+          <Route path="guestadd" element={<GuestAdd />} />
           {/* Xử lý trang không tìm thấy */}
           <Route path="*" element={<PageNotFound />} />
         </Route>

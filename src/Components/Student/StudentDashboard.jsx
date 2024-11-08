@@ -136,6 +136,26 @@ const StudentDashboard = () => {
         ),
     },
     {
+      title: "Images",
+      dataIndex: "imageUrls",
+      key: "imageUrls",
+      render: (imageUrls) =>
+        Array.isArray(imageUrls) && imageUrls.length > 0 ? (
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            {imageUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={`submission_image_${index}`}
+                style={{ width: "100px", height: "100px", margin: "5px" }}
+              />
+            ))}
+          </div>
+        ) : (
+          "No Images"
+        ),
+    },
+    {
       title: "Comments",
       key: "comments",
       render: (_, record) => (

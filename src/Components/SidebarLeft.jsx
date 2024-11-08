@@ -28,10 +28,8 @@ const SidebarLeft = ({ role }) => {
     { key: "1", icon: <UserOutlined />, label: <NavLink to="/loginmanager">Manage Accounts</NavLink> },
     { key: "2", icon: <TeamOutlined />, label: <NavLink to="/department-dashboard">Department</NavLink> },
     { key: "3", icon: <TeamOutlined />, label: <NavLink to="/supervisor-dashboard">Supervisor</NavLink> },
-    { key: "4", icon: <TeamOutlined />, label: <NavLink to="/teacher-dashboard">Teacher</NavLink> },
-    { key: "5", icon: <ToolOutlined />, label: <NavLink to="/subject">Subject</NavLink>, children: [
-      { key: "5-1", label: <NavLink to="/new-subject">New Subject</NavLink> }
-    ]},
+    { key: "4", icon: <TeamOutlined />, label: <NavLink to="/student-dashboard">Teacher</NavLink> },
+    { key: "5", icon: <ToolOutlined />, label: <NavLink to="/subject">Subject</NavLink> },
     { key: "6", icon: <ToolOutlined />, label: <NavLink to="/student-dashboard">Student</NavLink> },
     { key: "7", icon: <ToolOutlined />, label: <NavLink to="/">Guest</NavLink> },
     { key: "8", label: <LogoutButton collapsed={collapsed} /> },

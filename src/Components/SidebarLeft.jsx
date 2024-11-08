@@ -39,7 +39,7 @@ const SidebarLeft = ({ role }) => {
 
   const teacherMenuItems = [
     { key: "5", icon: <ToolOutlined />, label: <NavLink to="/subject">Subject</NavLink> },
-    { key: "4", icon: <TeamOutlined />, label: <NavLink to="/teacher-dashboard">Teacher</NavLink> },
+    { key: "4", icon: <TeamOutlined />, label: <NavLink to="/student-dashboard">Teacher</NavLink> },
     { key: "8", label: <LogoutButton collapsed={collapsed} /> },
   ];
 

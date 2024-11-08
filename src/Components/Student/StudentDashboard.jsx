@@ -15,8 +15,15 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
 
   const userData = JSON.parse(localStorage.getItem("user"));
+  const userId = userData ? userData.userId : null;
   const userDepartment = userData ? userData.department : null;
+  const userRole = userData ? userData.role : null; // Lấy role của user (student, teacher, admin)
+  
+  // In ra userId và userRole để kiểm tra
+  console.log("Current User ID:", userId);
+  console.log("Current User Role:", userRole);
 
+  // Lấy danh sách khoa từ Firebase
   const fetchAllDepartments = async () => {
     const response = await axios.get(`${firebaseConfig.databaseURL}/departments.json`);
     return response.data;
@@ -32,12 +39,12 @@ const StudentDashboard = () => {
             subject.departmentName = departments[subject.department]?.departmentName || "No Department";
             return subject;
           });
-
-          // Lọc các môn học có department trùng với department của người dùng
-          const filteredSubjects = subjectList.filter(
-            (subject) => subject.department === userDepartment
+  
+          // Nếu người dùng là admin hoặc teacher, không cần lọc theo department
+          const filteredSubjects = subjectList.filter((subject) => 
+            userRole === 'student' ? subject.department === userDepartment : true
           );
-
+  
           setSubjects(filteredSubjects);
         } else {
           setSubjects([]);
@@ -49,7 +56,8 @@ const StudentDashboard = () => {
       }
     };
     loadSubjects();
-  }, [userDepartment]);
+  }, [userDepartment, userRole]); // Chạy lại khi userRole hoặc userDepartment thay đổi
+  
 
   const fetchSubmissions = async (subjectId) => {
     setLoadingSubmissions(true);
@@ -58,19 +66,24 @@ const StudentDashboard = () => {
       const data = response.data;
 
       if (data) {
-        // Hiển thị tất cả submissions liên quan đến subject mà không lọc theo user ID
         const filteredSubmissions = Object.entries(data)
           .map(([key, value]) => ({
             submission_id: key,
             ...value,
           }))
-          .filter((submission) => submission.subject_id === subjectId);
-
+          .filter((submission) => {
+            // If user is a student, filter by user_id; if user is a teacher or admin, allow all submissions
+            return submission.subject_id === subjectId && 
+                   (userRole === 'teacher' || userRole === 'admin' || submission.user_id === userId);
+          });
+        console.log("Filtered Submissions:", filteredSubmissions);
         setSubmissions(filteredSubmissions);
       } else {
         setSubmissions([]);
+        console.log("No submissions data found.");
       }
     } catch (error) {
+      console.error("Error fetching submissions:", error);
       message.error("Failed to load submissions.");
     } finally {
       setLoadingSubmissions(false);
@@ -132,6 +145,27 @@ const StudentDashboard = () => {
           fileNames.map((name, index) => <div key={index}>{name}</div>)
         ) : (
           "No Files"
+        ),
+    },
+    
+    {
+      title: "Uploaded Images",
+      dataIndex: "imageUrls",
+      key: "imageUrls",
+      render: (imageUrls, record) =>
+        imageUrls && imageUrls.length > 0 ? (
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {imageUrls.map((url, index) => (
+              <img
+                key={index}
+                src={url}
+                alt={record.imageNames[index] || `Image ${index + 1}`}
+                style={{ width: '50px', height: '50px' }}
+              />
+            ))}
+          </div>
+        ) : (
+          "No Images"
         ),
     },
     {

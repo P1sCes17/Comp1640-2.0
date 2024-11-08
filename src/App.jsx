@@ -19,6 +19,9 @@ import NewSubject from './Components/Teacher/NewSubject';
 import DepartmentDashboard from './Components/Department/DepartmentDashboard';
 import DepartmentAdd from './Components/Department/DepartmentAdd';
 import DepartmentEdit from './Components/Department/DepartmentEdit';
+import GuestAdd from './Components/Guest/GuestAdd';
+import GuestManager from './Components/Guest/GuestManager';
+import GuestEdit from './Components/Guest/GuestEdit';
 
 function App() {
   return (
@@ -26,10 +29,10 @@ function App() {
       <Routes>
         {/* Route cho trang đăng nhập không có layout */}
         <Route path="/login" element={<Login />} />
-
+        <Route index element={<Login />} />
         {/* Route cho các trang khác sẽ bao gồm Layout */}
         <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+          
           <Route path="loginadd" element={<LoginAdd />} />
           <Route path="loginmanager" element={<LoginManager />} />
           
@@ -47,7 +50,9 @@ function App() {
           <Route path="department-dashboard" element={<DepartmentDashboard />} />
           <Route path="department-add" element={<DepartmentAdd />} />
           <Route path="department-edit/:id" element={<DepartmentEdit />} /> {/* Chỉnh sửa đường dẫn cho DepartmentEdit */}
-
+          <Route path="guestadd" element={<GuestAdd />} />
+          <Route path="guestmanager" element={<GuestManager />} />
+          <Route path="/guest-edit/:id" element={<GuestEdit />} />
           {/* Xử lý trang không tìm thấy */}
           <Route path="*" element={<PageNotFound />} />
         </Route>

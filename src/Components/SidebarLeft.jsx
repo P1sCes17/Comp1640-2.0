@@ -1,71 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { Layout, Menu, Button } from "antd";
+import { Layout, Menu } from "antd";
 import {
   UserOutlined,
-  ProjectOutlined,
   TeamOutlined,
   ToolOutlined,
-  CodeOutlined,
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
 } from "@ant-design/icons";
 import { NavLink, useLocation } from "react-router-dom";
 import "../assets/style/Pages/SidebarLeft.scss";
 import LogoutButton from "./LogoutButton";
-
-// Import logo
 import logoSidebar from "../assets/images/logo-sidebar.jpeg";
 
 const { Sider } = Layout;
 
 const SidebarLeft = ({ role }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [username, setUsername] = useState(""); // State để lưu tên tài khoản
-  const location = useLocation(); // Hook để lấy thông tin vị trí hiện tại
+  const [username, setUsername] = useState("");
+  const location = useLocation();
 
-  const adminMenuItems = [
-    {
-      key: "1",
-      icon: <UserOutlined />,
-      label: <NavLink to="/loginmanager">Manage Accounts</NavLink>,
-      children: [
-        { key: "1-1", label: <NavLink to="/LoginManager">Account Info</NavLink> },
-        { key: "1-2", label: <NavLink to="/change-password">Change Password</NavLink> },
-      ],
-    },
-    {
-      key: "2",
-      icon: <TeamOutlined />,
-      label: <NavLink to="/department-dashboard">Department</NavLink>,
-    },
-    {
-      key: "3",
-      icon: <ProjectOutlined />,
-      label: <NavLink to="/project-management">Project Management</NavLink>,
-      children: [
-        { key: "3-1", label: <NavLink to="/new-project">New Project</NavLink> },
-        { key: "3-2", label: <NavLink to="/project-tracking">Project Tracking</NavLink> },
-      ],
-    },
-    {
-      key: "4",
-      icon: <TeamOutlined />,
-      label: <NavLink to="/supervisor-dashboard">Supervisor</NavLink>,
-    },
-    {
-      key: "5",
-      icon: <ToolOutlined />,
-      label: <NavLink to="/teacher-dashboard">Teacher</NavLink>,
-      children: [
-        { key: "5-1", label: <NavLink to="/subject">Subject </NavLink> },
-        { key: "5-2", label: <NavLink to="/new-subject">New Subject </NavLink> },
-      ],
-    },
-    { key: "6", icon: <CodeOutlined />, label: <NavLink to="/student-dashboard">Student</NavLink> },
-    { key: "8", label: <LogoutButton collapsed={collapsed} /> },
-  ];
-
-  // Lấy tên tài khoản từ localStorage khi component mount
   useEffect(() => {
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
@@ -73,10 +24,49 @@ const SidebarLeft = ({ role }) => {
     }
   }, []);
 
-  // Lắng nghe thay đổi vị trí và làm mới
-  useEffect(() => {
-    // Có thể thêm logic ở đây nếu bạn muốn thực hiện điều gì đó khi vị trí thay đổi
-  }, [location]);
+  const adminMenuItems = [
+    { key: "1", icon: <UserOutlined />, label: <NavLink to="/loginmanager">Manage Accounts</NavLink> },
+    { key: "2", icon: <TeamOutlined />, label: <NavLink to="/department-dashboard">Department</NavLink> },
+    { key: "3", icon: <TeamOutlined />, label: <NavLink to="/supervisor-dashboard">Supervisor</NavLink> },
+    { key: "4", icon: <TeamOutlined />, label: <NavLink to="/teacher-dashboard">Teacher</NavLink> },
+    { key: "5", icon: <ToolOutlined />, label: <NavLink to="/subject">Subject</NavLink>, children: [
+      { key: "5-1", label: <NavLink to="/new-subject">New Subject</NavLink> }
+    ]},
+    { key: "6", icon: <ToolOutlined />, label: <NavLink to="/student-dashboard">Student</NavLink> },
+    { key: "7", icon: <ToolOutlined />, label: <NavLink to="/">Guest</NavLink> },
+    { key: "8", label: <LogoutButton collapsed={collapsed} /> },
+  ];
+
+  const teacherMenuItems = [
+    { key: "5", icon: <ToolOutlined />, label: <NavLink to="/subject">Subject</NavLink> },
+    { key: "4", icon: <TeamOutlined />, label: <NavLink to="/student-dashboard">Teacher</NavLink> },
+    { key: "8", label: <LogoutButton collapsed={collapsed} /> },
+  ];
+
+  const studentMenuItems = [
+    { key: "6", icon: <ToolOutlined />, label: <NavLink to="/student-dashboard">Student</NavLink> },
+    { key: "8", label: <LogoutButton collapsed={collapsed} /> },
+  ];
+
+  const supervisorMenuItems = [
+    { key: "3", icon: <TeamOutlined />, label: <NavLink to="/supervisor-dashboard">Supervisor</NavLink> },
+    { key: "8", label: <LogoutButton collapsed={collapsed} /> },
+  ];
+
+  const getMenuItems = () => {
+    switch (role) {
+      case "admin":
+        return adminMenuItems;
+      case "teacher":
+        return teacherMenuItems;
+      case "student":
+        return studentMenuItems;
+      case "supervisor":
+        return supervisorMenuItems;
+      default:
+        return [];
+    }
+  };
 
   return (
     <Sider
@@ -90,9 +80,9 @@ const SidebarLeft = ({ role }) => {
         <img src={logoSidebar} alt="Get IT" className="logo-sidebar" />
         {!collapsed && (
           <>
-            <h2 className="sidebar-title">GETIT COMPANY</h2>
+            <h2 className="sidebar-title">Greenwich</h2>
             <div className="account-info">
-              <span>Welcome, {username}</span>
+              <span>{username}</span>
             </div>
           </>
         )}
@@ -101,7 +91,7 @@ const SidebarLeft = ({ role }) => {
         theme="dark"
         mode="inline"
         defaultSelectedKeys={["1"]}
-        items={role === "admin" ? adminMenuItems : employeeMenuItems}
+        items={getMenuItems()}
       />
     </Sider>
   );

@@ -15,6 +15,7 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
 
   const userData = JSON.parse(localStorage.getItem("user"));
+  const userId = userData ? userData.userId : null;
   const userDepartment = userData ? userData.department : null;
 
   const fetchAllDepartments = async () => {
@@ -33,10 +34,11 @@ const StudentDashboard = () => {
             return subject;
           });
 
-          // Lọc các môn học có department trùng với department của người dùng
-          const filteredSubjects = subjectList.filter(
-            (subject) => subject.department === userDepartment
-          );
+          // Kiểm tra role của người dùng, nếu là admin thì hiển thị tất cả các môn học
+          const filteredSubjects =
+            userData.role === "admin"
+              ? subjectList
+              : subjectList.filter((subject) => subject.department === userDepartment);
 
           setSubjects(filteredSubjects);
         } else {
@@ -49,7 +51,7 @@ const StudentDashboard = () => {
       }
     };
     loadSubjects();
-  }, [userDepartment]);
+  }, [userDepartment, userData.role]);
 
   const fetchSubmissions = async (subjectId) => {
     setLoadingSubmissions(true);
@@ -58,7 +60,6 @@ const StudentDashboard = () => {
       const data = response.data;
 
       if (data) {
-        // Hiển thị tất cả submissions liên quan đến subject mà không lọc theo user ID
         const filteredSubmissions = Object.entries(data)
           .map(([key, value]) => ({
             submission_id: key,

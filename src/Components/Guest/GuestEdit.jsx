@@ -16,7 +16,7 @@ const GuestEdit = () => {
   useEffect(() => {
     const fetchGuestData = async () => {
       try {
-        const response = await axios.get(`${firebaseConfig.databaseURL}/guest/${id}.json`);
+        const response = await axios.get(`${firebaseConfig.databaseURL}/guests/${id}.json`);
         setGuestData(response.data);
         form.setFieldsValue(response.data);
       } catch (error) {
@@ -36,7 +36,7 @@ const GuestEdit = () => {
 
     if (fileList.length > 0) {
       const file = fileList[0].originFileObj;
-      const storageRef = ref(storage, `guest/${file.name}`);
+      const storageRef = ref(storage, `guests/${file.name}`);
       await uploadBytes(storageRef, file);
       imageUrl = await getDownloadURL(storageRef);
     }
@@ -48,9 +48,9 @@ const GuestEdit = () => {
     };
 
     try {
-      await axios.put(`${firebaseConfig.databaseURL}/guest/${id}.json`, updatedData);
+      await axios.put(`${firebaseConfig.databaseURL}/guests/${id}.json`, updatedData);
       message.success("Guest data updated successfully!");
-      navigate("/guest-manager");
+      navigate("/guestmanager");
     } catch (error) {
       message.error("Failed to update guest data");
       console.error(error);

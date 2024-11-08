@@ -9,10 +9,10 @@ const GuestManager = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch all data from "guest" table in Firebase
+    // Fetch all data from the "guest" table in Firebase
     const fetchGuests = async () => {
       try {
-        const response = await axios.get(`${firebaseConfig.databaseURL}/guest.json`);
+        const response = await axios.get(`${firebaseConfig.databaseURL}/guests.json`);
         if (response.data) {
           // Transform data into an array of objects with keys
           const guestsArray = Object.keys(response.data).map(key => ({
@@ -35,7 +35,7 @@ const GuestManager = () => {
   // Delete guest by key
   const deleteGuest = async (key) => {
     try {
-      await axios.delete(`${firebaseConfig.databaseURL}/guest/${key}.json`);
+      await axios.delete(`${firebaseConfig.databaseURL}/guests/${key}.json`);
       message.success('Guest deleted successfully!');
       setGuests(prevGuests => prevGuests.filter(guest => guest.key !== key));
     } catch (error) {
@@ -46,8 +46,18 @@ const GuestManager = () => {
 
   // Columns for the Ant Design Table component
   const columns = [
-    { title: 'Name', dataIndex: 'namestudent', key: 'namestudent', render: text => text || 'No Name' },
-    { title: 'Paragraph', dataIndex: 'paragraph', key: 'paragraph', render: text => text || 'No Paragraph' },
+    { 
+      title: 'Name', 
+      dataIndex: 'namestudent', 
+      key: 'namestudent', 
+      render: text => text || 'No Name' 
+    },
+    { 
+      title: 'Paragraph', 
+      dataIndex: 'paragraph', 
+      key: 'paragraph', 
+      render: text => text || 'No Paragraph' 
+    },
     {
       title: 'Image',
       dataIndex: 'imageUrl',

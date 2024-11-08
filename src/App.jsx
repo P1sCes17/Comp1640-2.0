@@ -29,10 +29,10 @@ function App() {
       <Routes>
         {/* Route cho trang đăng nhập không có layout */}
         <Route path="/login" element={<Login />} />
-
+        <Route index element={<Login />} />
         {/* Route cho các trang khác sẽ bao gồm Layout */}
         <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+          
           <Route path="loginadd" element={<LoginAdd />} />
           <Route path="loginmanager" element={<LoginManager />} />
           

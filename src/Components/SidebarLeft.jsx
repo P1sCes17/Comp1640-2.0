@@ -18,9 +18,10 @@ const SidebarLeft = ({ role }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUsername(storedUsername);
+    // Lấy tên tài khoản từ localStorage khi component mount
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser && storedUser.username) {
+      setUsername(storedUser.username);
     }
   }, []);
 
@@ -66,7 +67,7 @@ const SidebarLeft = ({ role }) => {
       case "supervisor":
         return supervisorMenuItems;
       case "guest":
-        return guestMenuItems;  
+        return guestMenuItems;
       default:
         return [];
     }

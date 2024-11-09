@@ -124,12 +124,7 @@ const Subject = () => {
       key: "actions",
       render: (_, record) => (
         <>
-          <Button type="link" style={{ color: "green" }} onClick={() => navigate(`/view-subject/${record.id}`)}>
-            View
-          </Button>
-          <Button type="link" style={{ color: "blue" }} onClick={() => navigate(`/edit-subject/${record.id}`)}>
-            Edit
-          </Button>
+          
           <Popconfirm
             title="Are you sure to delete this subject?"
             onConfirm={() => handleDelete(record.id)}

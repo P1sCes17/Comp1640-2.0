@@ -1,0 +1,72 @@
+/* Đảm bảo layout của sidebar và main content */
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #F6EEE0; /* Màu nền cho main content */
+}
+.sidebar-title {
+  color: #FFFFFF; /* Đổi màu chữ thành trắng */
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Sidebar CSS */
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Căn giữa logo theo chiều ngang */
+  justify-content: center; /* Căn giữa logo theo chiều dọc */
+  padding: 20px 0;
+}
+
+.logo-sidebar {
+  width: 50px; /* Kích thước logo */
+  height: 50px; /* Kích thước logo */
+  border-radius: 50%; /* Nếu muốn logo tròn */
+  margin-bottom: 10px;
+}
+
+
+.logo-sidebar {
+  width: 50px; /* Điều chỉnh chiều rộng logo */
+  height: 50px; /* Đặt chiều cao logo cho đồng bộ */
+  border-radius: 50%; /* Tùy chọn, nếu muốn logo tròn */
+  margin-bottom: 10px;
+}
+
+
+.main-content {
+  margin-left: 10px; /* Đẩy main content sang phải để không nằm dưới sidebar */
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Khi sidebar thu gọn */
+.sidebar.collapsed {
+  width: 80px; /* Kích thước sidebar khi thu gọn */
+}
+
+.main-content.collapsed {
+  margin-left: 80px; /* Điều chỉnh khoảng cách khi sidebar thu gọn */
+}
+
+/* Responsive cho thiết bị nhỏ */
+@media (max-width: 768px) {
+  .sidebar {
+    position: absolute; /* Sidebar sẽ hiển thị như một menu kéo ra ở thiết bị nhỏ */
+    width: 200px;
+    transition: transform 0.3s ease; /* Thêm hiệu ứng cho sidebar */
+    transform: translateX(-100%);
+  }
+
+  .sidebar.show {
+    transform: translateX(0); /* Hiển thị sidebar khi nhấn nút menu */
+  }
+
+  .main-content {
+    margin-left: 0; /* Main content chiếm toàn bộ màn hình khi sidebar ẩn */
+  }
+}

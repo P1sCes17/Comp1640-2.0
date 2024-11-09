@@ -51,6 +51,10 @@ const SidebarLeft = ({ role }) => {
     { key: "8", label: <LogoutButton collapsed={collapsed} /> },
   ];
 
+  const guestMenuItems = [
+    { key: "8", label: <LogoutButton collapsed={collapsed} /> },
+  ];
+
   const getMenuItems = () => {
     switch (role) {
       case "admin":
@@ -61,6 +65,8 @@ const SidebarLeft = ({ role }) => {
         return studentMenuItems;
       case "supervisor":
         return supervisorMenuItems;
+      case "guest":
+        return guestMenuItems;  
       default:
         return [];
     }
